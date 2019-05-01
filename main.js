@@ -55,14 +55,6 @@ const store = (function () {
     };
 }());
 
-store.create('counter', 0);
-
-const observe = function (...propNames) {
-    return function (target, key, descriptor) {
-        console.log(key);
-    }
-}
-
 const withStore = function (Component, ...propNames) {
     
     return class extends React.Component {
@@ -94,7 +86,13 @@ const withStore = function (Component, ...propNames) {
 
         render() {
             return (
-                <Component {...(this.state)} {...this.props} {...Object.fromEntries(propNames.map((propName) => [ 'set' + pascalCase(propName), (value) => { store[propName] = value } ] )) } />
+                <Component {...(this.state)} {...this.props} {...Object.fromEntries(propNames.map((propName) => [ 'set' + pascalCase(propName), (value) => {
+                    if (typeof value === 'function') {
+                        store[propName] = value(store[propName]);
+                    } else {
+                        store[propName] = value
+                    }
+                } ] )) } />
             )
         }
 
@@ -110,11 +108,13 @@ const CounterDisplay = function ({counter}) {
 
 const CounterDisplayWithStore = withStore(CounterDisplay, 'counter');
 
-const CounterButton = function ({counter, setCounter}) {
+const CounterButton = function ({setCounter}) {
     return (
-        <button onClick={() => setCounter(counter+1)}>Count</button>
+        <button onClick={() => setCounter((counter) => counter+1)}>Count</button>
     )
 }
+
+// store.create('counter', 0);
 
 const CounterButtonWithStore = withStore(CounterButton, 'counter');
 
