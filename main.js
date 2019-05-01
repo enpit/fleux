@@ -46,7 +46,7 @@ const store = (function () {
                 },
                 set [name] (value) {
                     values[name] = value;
-                    callbacks[name].forEach((callback) => callback(value));
+                    callbacks[name].forEach((callback) => callback({[name]: value}));
                 }
             });
         }
@@ -55,45 +55,58 @@ const store = (function () {
 
 store.create('counter', 0);
 
-class CounterDisplay extends React.Component {
-
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            counter: store.counter
-        }
-
-        this.updateCounter = this.updateCounter.bind(this);
-
-    }
-
-    componentDidMount() {
-        store.subscribe('counter', this.updateCounter)
-    }
-
-    componentWillUnmount() {
-        store.unsubscribe('counter', this.updateCounter)
-    }
-
-    updateCounter(counter) {
-        this.setState({
-            counter
-        })
-    }
-
-    render() {
-        return (
-            <div>Counter is {this.state.counter}</div>
-        )
+const observe = function (...propNames) {
+    return function (target, key, descriptor) {
+        console.log(key);
     }
 }
 
-// const CounterDisplay = function ({counter}) {
-//     return (
-//         <div>Counter is {counter}</div>
-//     )
-// }
+const withStore = function (Component, ...propNames) {
+    
+    return class extends React.Component {
+
+        constructor(props) {
+            super(props);
+
+            this.state = {
+                ...Object.fromEntries(propNames.map((propName) => [propName, store[propName]]))
+            }
+
+            this.updateState = this.updateState.bind(this);
+
+        }
+
+        componentDidMount() {
+            propNames.forEach((propName) => store.subscribe(propName, this.updateState));
+        }
+    
+        componentWillUnmount() {
+            propNames.forEach((propName) => store.unsubscribe(propName, this.updateState));
+        }
+    
+        updateState(data) {
+            this.setState({
+                ...data
+            })
+        }
+
+        render() {
+            return (
+                <Component {...(this.state)} {...this.props} />
+            )
+        }
+
+    }
+
+}
+
+const CounterDisplay = function ({counter}) {
+    return (
+        <div>Counter is {counter}</div>
+    )
+}
+
+const CounterDisplayWithStore = withStore(CounterDisplay, 'counter');
 
 const CounterButton = function () {
     return (
@@ -104,7 +117,7 @@ const CounterButton = function () {
 const App = function () {
     return (
         <div>
-            <CounterDisplay />
+            <CounterDisplayWithStore />
             <CounterButton />
         </div>
     )
