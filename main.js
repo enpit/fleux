@@ -1,6 +1,8 @@
 import * as React from 'react';
 import ReactDom from 'react-dom';
 
+import pascalCase from 'just-pascal-case';
+
 function completeAssign(target, ...sources) {
     sources.forEach(source => {
       let descriptors = Object.keys(source).reduce((descriptors, key) => {
@@ -27,7 +29,7 @@ const store = (function () {
     return {
         subscribe (name, callback) {
             if (typeof callbacks[name] === 'undefined') {
-                callbacks[name] = [];
+                this.create(name);
             }
             callbacks[name].push(callback)
         },
@@ -92,7 +94,7 @@ const withStore = function (Component, ...propNames) {
 
         render() {
             return (
-                <Component {...(this.state)} {...this.props} />
+                <Component {...(this.state)} {...this.props} {...Object.fromEntries(propNames.map((propName) => [ 'set' + pascalCase(propName), (value) => { store[propName] = value } ] )) } />
             )
         }
 
@@ -108,17 +110,21 @@ const CounterDisplay = function ({counter}) {
 
 const CounterDisplayWithStore = withStore(CounterDisplay, 'counter');
 
-const CounterButton = function () {
+const CounterButton = function ({counter, setCounter}) {
     return (
-        <button onClick={() => store.counter++}>Count</button>
+        <button onClick={() => setCounter(counter+1)}>Count</button>
     )
 }
+
+const CounterButtonWithStore = withStore(CounterButton, 'counter');
+
+console.log(store);
 
 const App = function () {
     return (
         <div>
             <CounterDisplayWithStore />
-            <CounterButton />
+            <CounterButtonWithStore />
         </div>
     )
 }
