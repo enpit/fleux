@@ -60,8 +60,6 @@ const CounterButton = function ({counter, setCounter}) {
 
 const CounterButtonWithStore = withStore(CounterButton, 'counter');
 
-console.log(store);
-
 const App = function () {
     return (
         <div>
