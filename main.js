@@ -11,15 +11,6 @@ const CounterDisplay = function ({counter}) {
 
 const CounterDisplayWithStore = withStore(['counter'])(CounterDisplay);
 
-// @withStore('counter')
-// class CounterButton extends React.Component {
-//     render() {
-//         return (
-//             <button onClick={() => this.props.setCounter((counter) => counter+1)}>Count</button>
-//         )
-//     }
-// }
-
 const CounterButton = function ({setCounter}) {
     return (
         <button onClick={() => setCounter((counter) => counter+1)}>Count</button>
@@ -27,8 +18,6 @@ const CounterButton = function ({setCounter}) {
 }
 
 const CounterButtonWithStore = withStore([], ['counter'])(CounterButton);
-
-console.log(store);
 
 const App = function () {
     return (
