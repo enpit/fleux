@@ -19,6 +19,12 @@ function completeAssign(target, ...sources) {
     return target;
   }
 
+const isStore = function (obj) {
+    return typeof obj.subscribe === 'function'
+        && typeof obj.unsubscribe === 'function'
+        && typeof obj.create === 'function';
+}
+
 const readWriteHOC = function (store, readablePropNames = [], writeablePropNames = []) {
     return function (Component) {
         return class extends React.Component {
@@ -67,10 +73,19 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
 const context = React.createContext();
 
 const connect = function (Component, value) {
+
+    var store;
+
+    if (isStore(value)) {
+        store = value;
+    } else {
+        store = createStore(value);
+    }
+
     return class extends React.Component {
         render() {
             return (
-                <context.Provider value={value}>
+                <context.Provider value={store}>
                     <Component />
                 </context.Provider>
             )
