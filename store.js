@@ -49,3 +49,7 @@ const store = (function () {
         }
     };
 }());
+
+store.create('counter', 0);
+
+export default store;
