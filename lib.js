@@ -64,6 +64,54 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
     }
 }
 
+const context = React.createContext();
+
+const connect = function (Component, value) {
+    return class extends React.Component {
+        render() {
+            return (
+                <context.Provider value={value}>
+                    <Component />
+                </context.Provider>
+            )
+        }
+    }
+}
+
+const withContext = function (Component) {
+    return function () {
+        return (
+            <context.Consumer>
+                {value => (<Component context={value} />)}
+            </context.Consumer>
+        )
+    }
+}
+
+const withStore = function (store, ...propNames) {
+    if (propNames.every((propName) => typeof propName === 'string')) {
+        return readWriteHOC(store, propNames, propNames);
+    } else if (propNames.length <= 2 && propNames.every((propName) => Array.isArray(propName))) {
+        return readWriteHOC(store, propNames[0], propNames[1] || []);
+    }
+}
+
+const withState = function (...propNames) {
+    return function (Component) {
+        return function () {
+            const ComponentWithContext = withContext(function ({context}) {
+                const ComponentWithStore = withStore(context, ...propNames)(Component);
+                return (
+                    <ComponentWithStore />
+                )
+            });
+            return (
+                <ComponentWithContext />
+            )
+        }
+    }
+}
+
 const createStore = function (initialValues) {
 
     const values = {};
@@ -94,13 +142,6 @@ const createStore = function (initialValues) {
                     callbacks[name].forEach((callback) => callback({[name]: value}));
                 }
             });
-        },
-        withStore (...propNames) {
-            if (propNames.every((propName) => typeof propName === 'string')) {
-                return readWriteHOC(store, propNames, propNames);
-            } else if (propNames.length <= 2 && propNames.every((propName) => Array.isArray(propName))) {
-                return readWriteHOC(store, propNames[0], propNames[1] || []);
-            }
         }
     };
 
@@ -110,4 +151,4 @@ const createStore = function (initialValues) {
     
 };
 
-export { createStore };
+export { connect, createStore, withContext, withState, withStore };
