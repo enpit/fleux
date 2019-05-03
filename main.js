@@ -1,6 +1,10 @@
 import * as React from 'react';
 import ReactDOM from 'react-dom';
-import { provide, subscribe } from 'alfa';
+import { action, inject, provide, subscribe } from 'alfa';
+
+const incrementCounter = action(function ({set, counter}) {
+    set('counter', counter+1);
+}, ['set', 'counter'], ['counter']);
 
 const CounterDisplay = function ({counter}) {
     return (
@@ -10,13 +14,13 @@ const CounterDisplay = function ({counter}) {
 
 const CounterDisplayWithSubscription = subscribe(CounterDisplay, ['counter']);
 
-const CounterButton = function ({set, counter}) {
+const CounterButton = function ({incrementCounter}) {
     return (
-        <button onClick={() => set('counter', counter+1)}>Count</button>
+        <button onClick={() => incrementCounter()}>Count</button>
     )
 }
 
-const CounterButtonWithSubscription = subscribe(CounterButton, ['set', 'counter'], ['counter']);
+const CounterButtonWithSubscription = inject(CounterButton, ['incrementCounter'], ['counter']);
 
 const App = function () {
     return (
@@ -28,7 +32,8 @@ const App = function () {
 }
 
 const Root = provide(App, {
-    counter: 0
+    counter: 0,
+    incrementCounter
 })
 
 document.addEventListener('DOMContentLoaded', function () {
