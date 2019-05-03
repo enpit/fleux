@@ -12,6 +12,7 @@
   "dependencies": {
     "just-camel-case": "^4.0.2",
     "just-pascal-case": "^1.1.0",
+    "overstated": "^2.0.0-beta.3",
     "react": "^16.8.6",
     "react-dom": "^16.8.6"
   },
