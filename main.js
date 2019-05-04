@@ -1,7 +1,7 @@
 import * as React from 'react';
 import ReactDom from 'react-dom';
 
-import { connect, createStore, withState } from './lib';
+import { connect, withState } from './lib';
 
 const CounterDisplay = function ({counter}) {
     return (
@@ -19,15 +19,6 @@ const CounterButton = function ({setCounter}) {
 
 const CounterButtonWithState = withState('counter')(CounterButton);
 
-// console.log(store);
-
-const Test = function (props) {
-    console.log(props);
-    return (
-        <div>Hello</div>
-    )
-}
-
 const App = function () {
     return (
         <div>
@@ -38,9 +29,9 @@ const App = function () {
     )
 }
 
-const Root = connect(App, createStore({
-    counter: 47
-}));
+const Root = connect(App, {
+    counter: 0
+});
 
 document.addEventListener('DOMContentLoaded', function () {
     ReactDom.render(<Root />, document.getElementById('root'));
