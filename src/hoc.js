@@ -1,29 +1,7 @@
 import * as React from 'react';
 import pascalCase from 'just-pascal-case';
 
-function completeAssign(target, ...sources) {
-    sources.forEach(source => {
-      let descriptors = Object.keys(source).reduce((descriptors, key) => {
-        descriptors[key] = Object.getOwnPropertyDescriptor(source, key);
-        return descriptors;
-      }, {});
-      // by default, Object.assign copies enumerable Symbols too
-      Object.getOwnPropertySymbols(source).forEach(sym => {
-        let descriptor = Object.getOwnPropertyDescriptor(source, sym);
-        if (descriptor.enumerable) {
-          descriptors[sym] = descriptor;
-        }
-      });
-      Object.defineProperties(target, descriptors);
-    });
-    return target;
-  }
-
-const isStore = function (obj) {
-    return typeof obj.subscribe === 'function'
-        && typeof obj.unsubscribe === 'function'
-        && typeof obj.create === 'function';
-}
+import { createStore, isStore } from './store';
 
 const readWriteHOC = function (store, readablePropNames = [], writeablePropNames = []) {
     return function (Component) {
@@ -43,11 +21,11 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
             componentDidMount() {
                 readablePropNames.forEach((propName) => store.subscribe(propName, this.updateState));
             }
-        
+
             componentWillUnmount() {
                 readablePropNames.forEach((propName) => store.unsubscribe(propName, this.updateState));
             }
-        
+
             updateState(data) {
                 this.setState({
                     ...data
@@ -127,43 +105,4 @@ const withState = function (...propNames) {
     }
 }
 
-const createStore = function (initialValues) {
-
-    const values = {};
-    const callbacks = {};
-
-    const store = {
-        subscribe (name, callback) {
-            if (typeof callbacks[name] === 'undefined') {
-                this.create(name, this[name]);
-            }
-            callbacks[name].push(callback)
-        },
-        unsubscribe (name, callback) {
-            if (typeof callbacks[name] === 'undefined') {
-                callbacks[name] = [];
-            }
-            callbacks[name].splice(callbacks[name].indexOf(callback), 1);
-        },
-        create (name, initialValue) {
-            values[name] = initialValue;
-            callbacks[name] = [];
-            completeAssign(this, {
-                get [name] () {
-                    return values[name];
-                },
-                set [name] (value) {
-                    values[name] = value;
-                    callbacks[name].forEach((callback) => callback({[name]: value}));
-                }
-            });
-        }
-    };
-
-    Object.entries(initialValues).forEach(([name, value]) => store.create(name, value));
-
-    return store;
-    
-};
-
-export { connect, createStore, withContext, withState, withStore };
+export { connect, withState, withStore };
