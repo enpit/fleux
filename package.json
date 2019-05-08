@@ -2,23 +2,43 @@
   "name": "state",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "browser": "dist/index.umd.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "npm run clean && rollup -c",
+    "clean": "rimraf build/ dist/",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "watch": "rollup -c -w"
   },
+  "files": [
+    "dist",
+    "LICSENSE",
+    "README.md"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "just-camel-case": "^4.0.2",
-    "just-pascal-case": "^1.1.0",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6"
+    "just-pascal-case": "^1.1.0"
+  },
+  "peerDependencies": {
+    "react": "^16.3.0"
   },
   "devDependencies": {
+    "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.4",
     "@babel/plugin-proposal-class-properties": "^7.4.4",
     "@babel/plugin-proposal-decorators": "^7.4.4",
-    "@babel/preset-react": "^7.0.0"
+    "@babel/preset-env": "^7.4.4",
+    "@babel/preset-react": "^7.0.0",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "rimraf": "^2.6.3",
+    "rollup": "^1.11.2",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-node-resolve": "^4.2.3"
   }
 }
