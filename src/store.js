@@ -1,6 +1,6 @@
 import completeAssign from './completeAssign';
 
-const createStore = function (initialValues) {
+const createStore = function (initialValues = {}) {
 
     const values = {};
     const callbacks = {};
