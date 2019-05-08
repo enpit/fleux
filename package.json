@@ -17,7 +17,9 @@
     "README.md"
   ],
   "keywords": [],
-  "author": "",
+  "author": "Peter Steinberg <objectliteral@outlook.com> (https://github.com/objectliteral)",
+  "repository": "github:objectliteral/fleux",
+  "bugs": "https://github.com/objectliteral/fleux/issues",
   "license": "MIT",
   "dependencies": {
     "just-camel-case": "^4.0.2",
