@@ -65,7 +65,7 @@ const App = function () {
 const Root = connect(App, { counter: 0 })
 
 // Render your app to the page and enjoy the stateful components in action!
-render(<Root />, document.getElementById('root));
+render(<Root />, document.getElementById('root'));
 ```
 
 ### Direct Access
