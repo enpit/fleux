@@ -90,3 +90,9 @@ typings/
 # Lockfiles
 package-lock.json
 yarn.lock
+
+# Pre-Compilation Sources
+src/
+
+# Usage Examples
+examples/
