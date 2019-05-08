@@ -1,18 +1,55 @@
-First of all: This is very WIP!
+## Installation
 
-## Running the Examples
+You know the drill:
 
-With Parcel installed (`yarn global add parcel-bundler`) you should just need to run `parcel index.html` and the rest should be done for you.
+```sh
+npm i fleux
+```
 
-## Contents of this Repo
+**fleux** comes packages in ESM, CJS and UMD formats, so you should be all set to use it in whatever environment or workflow you need to target.
 
-The repo contains branches that contain little steps of my journey towards sane state management in react. Checkout each branch to see the evolution from `setState` to something kinda cool. The first two steps are more significant, while 5,6,7 are more or less details, step 8 is a bigger one again.
+## Basic Usage
 
-- Step 1: Vanilla React using `setState`
-- Step 2: Global State Store incl. PubSub and nifty accessors
-- Step 3: HOC to wire things up easily
-- Step 4: Adding injected setter function
-- Step 5: Make said setter accept a function that takes the current state (to be consistent with `setState`)
-- Step 6: Slightly change the API to allow for the use as a decorator
-- Step 7: Add capability to distinguish between readable and writeable values (optional and only for perf reasons)
-- Step 8: Add behind-the-scenes usage of the Context API to allow for cleaner API
+The following basic example shows you how to use **fleux**.
+
+```js
+import React from 'react';
+import { render } from 'react-dom';
+import { connect, withState } from 'state';
+
+// Write your component as you would do if it were just taking props.
+const CounterDisplay = function ({counter}) {
+    return (
+        <div>Counter is {counter}</div>
+    )
+}
+
+// Use the `withState` HOC to have your component consume a value from the store.
+const CounterDisplayWithState = withState('counter')(CounterDisplay);
+
+// For a component to be able to alter data in the store, it can use a corresponding setter function.
+const CounterButton = function ({setCounter}) {
+    return (
+        <button onClick={() => setCounter((counter) => counter+1)}>Count</button>
+    )
+}
+
+// Again, just use `withState`, which injects the setter prop into your component.
+const CounterButtonWithState = withState('counter')(CounterButton);
+
+// Define your app and include the stateful components.
+const App = function () {
+    return (
+        <div>
+            <CounterDisplayWithState />
+            <CounterButtonWithState />
+        </div>
+    )
+}
+
+// Connect the root component of your app to a data store, initializing it with some data.
+const Root = connect(App, { counter: 0 })
+
+// Render your app to the page and enjoy the stateful components in action!
+render(<Root />, document.getElementById('root));
+```
