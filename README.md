@@ -1,3 +1,13 @@
+## Motivation
+
+Handling state in React can be cumbersome. **fleux** aims to alleviate your pain by providing you with easily accessible stores that connect your application's components.
+
+**fleux** aims to offer an elegant API that is simultaneously flexible enough to allow you to write your application the way *you* want! You should only ever need to use those parts of **fleux** that you actually need.
+
+## !Development Notice!
+
+**This library in its very early stages of development. Its current feature set is limited and its API subject to change.**
+
 ## Installation
 
 You know the drill:
@@ -6,16 +16,16 @@ You know the drill:
 npm i fleux
 ```
 
-**fleux** comes packages in ESM, CJS and UMD formats, so you should be all set to use it in whatever environment or workflow you need to target.
+**fleux** comes with bundles in ESM, CJS and UMD formats, so you should be all set to use it in whatever environment or workflow you need to target.
 
 ## Basic Usage
 
-The following basic example shows you how to use **fleux**.
+The following basic example shows you how to use **fleux** to implement a little counter:
 
 ```js
 import React from 'react';
 import { render } from 'react-dom';
-import { connect, withState } from 'state';
+import { connect, withState } from 'fleux';
 
 // Write your component as you would do if it were just taking props.
 const CounterDisplay = function ({counter}) {
@@ -53,3 +63,23 @@ const Root = connect(App, { counter: 0 })
 // Render your app to the page and enjoy the stateful components in action!
 render(<Root />, document.getElementById('root));
 ```
+
+### Direct Access
+
+If you need access to the store outside of a React component, you can easily get it:
+
+```js
+import { createStore } from 'fleux';
+
+// If you want to use the state store not only in your React components, create it like this
+const store = createStore();
+```
+
+You can now access your state as properties on the store (accessor properties behind the scenes take care of the rest). The store offers a small API for subscribing to changes like this:
+
+```js
+store.subscribe('foo', ({foo}) => console.log(foo));
+store.foo = 'bar'; // logs 'bar'
+```
+
+This direct store access allows you to connect the state store used in your React components to other parts of your application.
