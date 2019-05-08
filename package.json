@@ -1,6 +1,6 @@
 {
   "name": "fleux",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Towards Sane State Management",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
