@@ -4,6 +4,10 @@ Handling state in React can be cumbersome. **fleux** aims to alleviate your pain
 
 **fleux** aims to offer an elegant API that is simultaneously flexible enough to allow you to write your application the way *you* want! You should only ever need to use those parts of **fleux** that you actually need.
 
+### Flexible, Not Flux
+
+The [flux pattern](http://facebook.github.io/flux/) prohibits views from mutating state directly and instead enforces the use of actions. This makes complete sense, but we think, whether to exclusively rely on actions to change the state, is a decision for the application developer and not one, that a library should dictate! Libraries are tools that developers use to solve their problems and thus they should be flexible enough to support the developer instead of restricting them.
+
 ## !Development Notice!
 
 **This library in its very early stages of development. Its current feature set is limited and its API subject to change.**
