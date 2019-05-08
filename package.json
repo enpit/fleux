@@ -1,6 +1,6 @@
 {
-  "name": "state",
-  "version": "1.0.0",
+  "name": "fleux",
+  "version": "0.0.9",
   "description": "",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
@@ -18,7 +18,7 @@
   ],
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "just-camel-case": "^4.0.2",
     "just-pascal-case": "^1.1.0"
