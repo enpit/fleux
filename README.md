@@ -71,9 +71,11 @@ If you need access to the store outside of a React component, you can easily get
 ```js
 import { createStore } from 'fleux';
 
-// If you want to use the state store not only in your React components, create it like this
+// If you want to use the state store not only in your React components, create it like this.
 const store = createStore();
 ```
+
+(It should be noted that in general it is not recommended to create a store without initializing any values).
 
 You can now access your state as properties on the store (accessor properties behind the scenes take care of the rest). The store offers a small API for subscribing to changes like this:
 
