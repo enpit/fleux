@@ -1,5 +1,3 @@
-import completeAssign from './completeAssign';
-
 const createStore = function (initialValues = {}) {
 
     const values = {};
@@ -23,11 +21,11 @@ const createStore = function (initialValues = {}) {
     const create = function (name, initialValue) {
         values[name] = initialValue;
         callbacks[name] = [];
-        completeAssign(store, {
-            get [name] () {
+        Object.defineProperty(store, name, {
+            get () {
                 return values[name];
             },
-            set [name] (value) {
+            set (value) {
                 values[name] = value;
                 callbacks[name].forEach((callback) => callback({[name]: value}));
             }
