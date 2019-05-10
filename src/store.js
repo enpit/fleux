@@ -8,7 +8,7 @@ const createStore = function (initialValues = {}) {
 
     const subscribe = function (name, callback) {
         if (typeof callbacks[name] === 'undefined') {
-            this.create(name, this[name]);
+            create(name, this[name]);
         }
         callbacks[name].push(callback)
     };
@@ -23,7 +23,7 @@ const createStore = function (initialValues = {}) {
     const create = function (name, initialValue) {
         values[name] = initialValue;
         callbacks[name] = [];
-        completeAssign(this, {
+        completeAssign(store, {
             get [name] () {
                 return values[name];
             },
@@ -49,7 +49,7 @@ const createStore = function (initialValues = {}) {
         }
     });
 
-    Object.entries(initialValues).forEach(([name, value]) => store.create(name, value));
+    Object.entries(initialValues).forEach(([name, value]) => create(name, value));
 
     return store;
 
