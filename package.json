@@ -23,6 +23,7 @@
   "bugs": "https://github.com/objectliteral/fleux/issues",
   "license": "MIT",
   "dependencies": {
+    "fromentries": "^1.1.0",
     "just-camel-case": "^4.0.2",
     "just-pascal-case": "^1.1.0"
   },
