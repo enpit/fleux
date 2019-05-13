@@ -72,10 +72,10 @@ const connect = function (Component, value) {
 }
 
 const withContext = function (Component) {
-    return function () {
+    return function (props) {
         return (
             <context.Consumer>
-                {value => (<Component context={value} />)}
+                {value => (<Component context={value} {...props} />)}
             </context.Consumer>
         )
     }
@@ -91,15 +91,15 @@ const withStore = function (store, ...propNames) {
 
 const withState = function (...propNames) {
     return function (Component) {
-        return function () {
-            const ComponentWithContext = withContext(function ({context}) {
+        return function (props) {
+            const ComponentWithContext = withContext(function ({context, ...props}) {
                 const ComponentWithStore = withStore(context, ...propNames)(Component);
                 return (
-                    <ComponentWithStore />
+                    <ComponentWithStore {...props} />
                 )
             });
             return (
-                <ComponentWithContext />
+                <ComponentWithContext {...props} />
             )
         }
     }
