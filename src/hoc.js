@@ -1,5 +1,6 @@
 import * as React from 'react';
 import pascalCase from 'just-pascal-case';
+import fromEntries from 'fromentries';
 
 import { createStore, isStore } from './store';
 
@@ -11,7 +12,7 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
                 super(props);
 
                 this.state = {
-                    ...Object.fromEntries(readablePropNames.map((propName) => [propName, store[propName]]))
+                    ...fromEntries(readablePropNames.map((propName) => [propName, store[propName]]))
                 }
 
                 this.updateState = this.updateState.bind(this);
@@ -34,7 +35,7 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
 
             render() {
                 return (
-                    <Component {...(this.state)} {...this.props} {...Object.fromEntries(writeablePropNames.map((propName) => [ 'set' + pascalCase(propName), (value) => {
+                    <Component {...(this.state)} {...this.props} {...fromEntries(writeablePropNames.map((propName) => [ 'set' + pascalCase(propName), (value) => {
                         if (typeof value === 'function') {
                             store[propName] = value(store[propName]);
                         } else {
