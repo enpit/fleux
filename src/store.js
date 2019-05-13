@@ -24,7 +24,17 @@ const createStore = function (initialValues = {}) {
     };
 
     const create = function (name, initialValue) {
-        values[name] = initialValue;
+
+        if (typeof store[name] !== 'undefined') {
+            if (typeof initialValue !== 'undefined') {
+                throw Error("Refusing to override existing value with initialization data. This error is caused by providing an initial value to a key that already exists. This is likely to be a mistkae. Please create the key without an initialization value.");
+            } else {
+                values[name] = store[name];
+            }
+        } else {
+            values[name] = initialValue;
+        }
+
         callbacks[name] = [];
         Object.defineProperty(store, name, {
             get () {
