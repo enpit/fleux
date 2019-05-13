@@ -1,15 +1,16 @@
 {
   "name": "fleux",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "description": "Towards Sane State Management",
   "main": "dist/index.cjs.js",
   "module": "dist/index.esm.js",
   "browser": "dist/index.umd.js",
   "scripts": {
-    "build": "npm run clean && rollup -c",
+    "build": "cross-env $npm_execpath run clean && rollup -c",
+    "build:watch": "cross-env $npm_execpath run clean && rollup -c -w",
     "clean": "rimraf build/ dist/",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "rollup -c -w"
+    "test": "cross-env $npm_execpath run build && jest",
+    "test:watch": "cross-env $npm_execpath run build && jest --watch"
   },
   "files": [
     "dist",
@@ -35,6 +36,14 @@
     "@babel/plugin-proposal-decorators": "^7.4.4",
     "@babel/preset-env": "^7.4.4",
     "@babel/preset-react": "^7.0.0",
+    "babel-jest": "^24.8.0",
+    "cross-env": "^5.2.0",
+    "enzyme": "^3.9.0",
+    "enzyme-adapter-react-16": "^1.13.0",
+    "enzyme-to-json": "^3.3.5",
+    "jest": "^24.8.0",
+    "jest-extended": "^0.11.1",
+    "jsdom": "^15.1.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
     "rimraf": "^2.6.3",
