@@ -123,4 +123,24 @@ describe('global state', function () {
         setFooProp('bazzz');
         expect(wrapper.find(Foo).text()).toBe('bazzz');
     });
+
+    it('should pass on any props the parent passes to a stateful components', function () {
+        const Foo = function ({foo, setFoo, answer}) {
+            return (
+                <div>{answer}</div>
+            )
+        }
+
+        const FooWithState = withState('foo')(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState answer={42} />
+            )
+        }
+
+        const AppWithState = connect(App, {foo: 'bar'});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).text()).toBe('42');
+    });
 });
