@@ -6,11 +6,11 @@
   "module": "dist/index.esm.js",
   "browser": "dist/index.umd.js",
   "scripts": {
-    "build": "cross-env $npm_execpath run clean && rollup -c",
-    "build:watch": "cross-env $npm_execpath run clean && rollup -c -w",
+    "build": "yarpm run clean && rollup -c",
+    "build:watch": "yarpm run clean && rollup -c -w",
     "clean": "rimraf build/ dist/",
-    "test": "cross-env $npm_execpath run build && jest",
-    "test:watch": "cross-env $npm_execpath run build && jest --watch"
+    "test": "yarpm run build && jest",
+    "test:watch": "yarpm run build && jest --watch"
   },
   "files": [
     "dist",
@@ -37,7 +37,6 @@
     "@babel/preset-env": "^7.4.4",
     "@babel/preset-react": "^7.0.0",
     "babel-jest": "^24.8.0",
-    "cross-env": "^5.2.0",
     "enzyme": "^3.9.0",
     "enzyme-adapter-react-16": "^1.13.0",
     "enzyme-to-json": "^3.3.5",
@@ -50,6 +49,7 @@
     "rollup": "^1.11.3",
     "rollup-plugin-babel": "^4.3.2",
     "rollup-plugin-commonjs": "^9.3.4",
-    "rollup-plugin-node-resolve": "^4.2.3"
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "yarpm": "^0.2.1"
   }
 }
