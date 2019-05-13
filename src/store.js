@@ -5,6 +5,11 @@ const createStore = function (initialValues = {}) {
     const store = {};
 
     const subscribe = function (name, callback) {
+
+        if (typeof name !== 'string' && typeof name !== 'symbol') {
+            throw new TypeError('Cannot subscribe to a key of type: ' + typeof name + '. Expecting \'string\' or \'symbol\'.')
+        }
+
         if (typeof callbacks[name] === 'undefined') {
             create(name, this[name]);
         }
