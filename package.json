@@ -6,10 +6,11 @@
   "module": "dist/index.esm.js",
   "browser": "dist/index.umd.js",
   "scripts": {
-    "build": "npm run clean && rollup -c",
+    "build": "cross-env $npm_execpath run clean && rollup -c",
+    "build:watch": "cross-env $npm_execpath run clean && rollup -c -w",
     "clean": "rimraf build/ dist/",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "rollup -c -w"
+    "test": "cross-env $npm_execpath run build && jest",
+    "test:watch": "cross-env $npm_execpath run build && jest --watch"
   },
   "files": [
     "dist",
