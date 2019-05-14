@@ -93,6 +93,13 @@ const withStore = function (store, ...propNames) {
 const withState = function (...propNames) {
     return function (Component) {
         return function (props) {
+
+            const conflictingNames = propNames.filter(name => props.hasOwnProperty(name));
+
+            if (conflictingNames.length > 0) {
+                throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
+            }
+
             const ComponentWithContext = withContext(function ({context, ...props}) {
                 const ComponentWithStore = withStore(context, ...propNames)(Component);
                 return (
