@@ -81,6 +81,13 @@ describe('store', function () {
                 });
             }).toThrow(TypeError);
         });
+
+        it('should preserve a previously not properly created value', function () {
+            const store = createStore();
+            store.foo = 'bar';
+            store.subscribe('foo', () => {});
+            expect(store.foo).toBe('bar');
+        });
     });
 
     describe('create', function () {
