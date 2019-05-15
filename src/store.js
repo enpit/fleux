@@ -27,7 +27,7 @@ const createStore = function (initialValues = {}) {
 
         if (typeof store[name] !== 'undefined') {
             if (typeof initialValue !== 'undefined') {
-                throw Error("Refusing to override existing value with initialization data. This error is caused by providing an initial value to a key that already exists. This is likely to be a mistkae. Please create the key without an initialization value.");
+                throw Error(`Refusing to override existing value with initialization data for prop ${name}. This error is caused by providing an initial value to a key that already exists. This is likely to be a mistake. Please create the key without an initialization value.`);
             } else {
                 values[name] = store[name];
             }
