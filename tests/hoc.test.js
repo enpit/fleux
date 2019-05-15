@@ -48,8 +48,7 @@ describe('connect', function () {
 });
 
 describe('withState', function () {
-    it('', function () {
-
+    it('returns a component that wraps its input component and renders it', function () {
         const Foo = function () {
             return (
                 <div>Foo</div>
@@ -67,6 +66,113 @@ describe('withState', function () {
         const AppWithState = connect(App, {});
         const wrapper = render(<AppWithState />);
         expect(wrapper.text()).toBe('Foo');
+    });
+
+    it('takes a string argument that is interpreted as a readable and writeable store key and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState('foo')(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar'});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('takes a list of string arguments that are interpreted as readable and writeable store keys and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState('foo', 'answer')(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
+        expect(wrapper.find(Foo).props().answer).toBeDefined()
+        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('takes an array argument that is interpreted as a list of readable store keys and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState(['foo', 'answer'])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).not.toBeDefined();
+        expect(wrapper.find(Foo).props().answer).toBeDefined()
+        expect(wrapper.find(Foo).props().setAnswer).not.toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('takes `null` and an array argument that is interpreted as a list of writeable store keys and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState(null, ['foo', 'answer'])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).not.toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
+        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
+        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('throws when supplied with a mix of array and string arguments', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        expect(() => {
+            withState('null', ['foo', 'answer'])(Foo)
+        }).toThrow();
+
     });
 });
 
@@ -174,10 +280,37 @@ describe('global state', function () {
                 <FooWithState foo={'bar'} />
             )
         }
-
         const AppWithState = connect(App, {foo: 'bar'});
+
         expect(() => {
             const wrapper = mount(<AppWithState />);
         }).toThrow();
+
+        const FooWithStateTheSecond = withState(['foo'], ['bar'])(Foo);
+
+        const AppTheSecond = function () {
+            return (
+                <FooWithStateTheSecond foo={'bar'} />
+            )
+        }
+        const AppWithStateTheSecond = connect(AppTheSecond, {foo: 'bar'});
+
+        expect(() => {
+            const wrapper = mount(<AppWithStateTheSecond />);
+        }).toThrow();
+
+        const FooWithStateTheThird = withState(['foo'], ['bar'])(Foo);
+
+        const AppTheThird = function () {
+            return (
+                <FooWithStateTheThird setBar={'bar'} />
+            )
+        }
+        const AppWithStateTheThird = connect(AppTheThird, {foo: 'bar'});
+
+        // ! This should actually fail, but the required internal checks are not yet implemented.
+        expect(() => {
+            const wrapper = mount(<AppWithStateTheThird />);
+        }).not.toThrow();
     });
 });
