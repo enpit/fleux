@@ -68,6 +68,33 @@ const Root = connect(App, { counter: 0 })
 render(<Root />, document.getElementById('root'));
 ```
 
+### Mutating State
+
+Your components don't need to use actions to mutate the state in the store, but can use a setter function that is injected into their props.
+
+```js
+const CounterButton = function ({setCounter}) {
+    return (
+        <button onClick={() => setCounter((counter) => counter+1)}>Count</button>
+    )
+}
+const CounterButtonWithState = withState('counter')(CounterButton);
+```
+
+The name of the setter for a key `foo` in the store is automatically set to `setFoo`, i.e. the key is pascal-cased and then prefixed with `set`.
+
+A setter function either takes the new value or a function that will be called with the current value and returns the new one (similar to React's own `setState`).
+
+#### Prevent rerenders on write-only components
+
+If a component only mutates a value in the store without needing to read it, it is not nessecary to rerender that component, when the value changes. To tell **fleux** that a value is write-only, you can do this:
+
+```js
+withState(null, ['toBeWritten'])
+```
+
+If one of the first two arguments to `withState` is an array, the function assumes the first argument to be an array of readable keys from the store and the second to be a list of writeable keys. A component will only receive the props for reading or writing, and will not be rerendered when a value changes, that the component does not read.
+
 ### Direct Access
 
 If you need access to the store outside of a React component, you can easily get it:
