@@ -96,7 +96,8 @@ const withState = function (...propNames) {
     const parsedProps = parseProps(propNames);
 
     return function (Component) {
-        return function (props) {
+
+        const ComponentWithState = function (props) {
 
             const conflictingNames = parsedProps.flat().filter(name => props.hasOwnProperty(name));
 
@@ -106,6 +107,7 @@ const withState = function (...propNames) {
 
             const ComponentWithContext = withContext(function ({context, ...props}) {
                 const ComponentWithStore = readWriteHOC(context, ...parsedProps)(Component);
+
                 return (
                     <ComponentWithStore {...props} />
                 );
@@ -115,7 +117,11 @@ const withState = function (...propNames) {
                 <ComponentWithContext {...props} />
             );
 
-        }
+        };
+
+        Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
+
+        return ComponentWithState;
     }
 }
 
