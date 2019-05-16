@@ -174,6 +174,21 @@ describe('withState', function () {
         }).toThrow();
 
     });
+
+    it('preserves static class properties of the original component', function () {
+        class Foo extends React.Component {
+            static foo = 'bar';
+
+            render() {
+                return (
+                    <div>Foo</div>
+                )
+            }
+        }
+
+        const FooWithState = withState()(Foo);
+        expect(FooWithState.foo).toBe('bar');
+    });
 });
 
 describe('global state', function () {
