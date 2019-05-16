@@ -162,6 +162,102 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
+    it('takes an array argument containing an array that is interpreted as a list of readable store keys and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState([['foo', 'answer']])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).not.toBeDefined();
+        expect(wrapper.find(Foo).props().answer).toBeDefined()
+        expect(wrapper.find(Foo).props().setAnswer).not.toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('takes an array argument containing two arrays that are interpreted as lists of readable resp. writeable store keys and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState([['foo'], ['answer']])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).not.toBeDefined();
+        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
+        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('takes an array argument containing `null` and an array that is interpreted as a list of writeable store keys and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState([null , ['foo', 'answer']])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).not.toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
+        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
+        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('takes an array argument containing `undefined` and an array that is interpreted as a list of writeable store keys and correspondingly injected into the component', function () {
+        const Foo = function ({foo, setFoo, answer, setAnswer}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState([, ['foo', 'answer']])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().foo).not.toBeDefined()
+        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
+        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
+        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        wrapper.unmount();
+    });
+
     it('throws when supplied with a mix of array and string arguments', function () {
         const Foo = function ({foo, setFoo, answer, setAnswer}) {
             return (
