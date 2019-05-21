@@ -116,3 +116,4 @@ store.foo = 'bar'; // logs 'bar'
 ```
 
 This direct store access allows you to connect the state store used in your React components to other parts of your application.
+
