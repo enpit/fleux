@@ -41,8 +41,9 @@ const createStore = function (initialValues = {}) {
                 return values[name];
             },
             set (value) {
+                const oldValue = values[name];
                 values[name] = value;
-                callbacks[name].forEach((callback) => callback({[name]: value}));
+                callbacks[name].forEach((callback) => callback({[name]: value}, {[name]: oldValue}));
             }
         });
     };

@@ -129,5 +129,24 @@ describe('subscriptions', function () {
             store.foo = 'bar';
             expect(tmp).toBe(true);
         });
+        it('should call all callbacks for a key and provide an object containing the key and its new value', function () {
+            const store = createStore();
+            var tmp = false;
+            store.subscribe('foo', function ({foo}) {
+                tmp = foo;
+            });
+            store.foo = 'bar';
+            expect(tmp).toBe('bar');
+        });
+        it('should call all callbacks for a key and provide an object containing the key and its new value as well as an object containing the key and its old value', function () {
+            const store = createStore();
+            var tmp = false;
+            store.foo = 'baz'
+            store.subscribe('foo', function (state, {foo}) {
+                tmp = foo;
+            });
+            store.foo = 'bar';
+            expect(tmp).toBe('baz');
+        });
     });
 });
