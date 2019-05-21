@@ -285,6 +285,37 @@ describe('withState', function () {
         const FooWithState = withState()(Foo);
         expect(FooWithState.foo).toBe('bar');
     });
+
+    it('uses the default store if rendered in a subtree without a connected store', function () {
+        const Foo = function ({foo}) {
+            return (
+                <div>{foo}</div>
+            )
+        }
+
+        const FooWithState = withState('foo')(Foo);
+
+        const FooSetter = function ({setFoo}) {
+            setFoo('bar');
+            return (
+                <div>setter</div>
+            )
+        }
+
+        const FooSetterWithState = withState('foo')(FooSetter);
+
+        const App = function () {
+            return (
+                <div>
+                    <FooSetterWithState />
+                    <FooWithState />
+                </div>
+            )
+        }
+
+        const wrapper = mount(<App />);
+        expect(wrapper.find(Foo).props().foo).toBe('bar');
+    });
 });
 
 describe('global state', function () {

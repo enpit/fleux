@@ -51,6 +51,7 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
 }
 
 const context = React.createContext();
+const defaultStore = createStore();
 
 const connect = function (Component, value) {
 
@@ -74,13 +75,19 @@ const connect = function (Component, value) {
 }
 
 const withContext = function (Component) {
-    return function (props) {
-        return (
-            <context.Consumer>
-                {value => (<Component context={value} {...props} />)}
-            </context.Consumer>
-        )
+
+    class ComponentWithContext extends React.Component {
+        render() {
+            const value = this.context || defaultStore;
+            return (
+                <Component context={value} {...this.props} />
+            )
+        }
     }
+
+    ComponentWithContext.contextType = context;
+
+    return ComponentWithContext;
 }
 
 const withStore = function (store, ...propNames) {
