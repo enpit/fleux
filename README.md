@@ -1,5 +1,3 @@
-> IT WORKS
-
 ## Motivation
 
 Handling state in React can be cumbersome. **fleux** aims to alleviate your pain by providing you with easily accessible stores that connect your application's components.
