@@ -1,9 +1,9 @@
 import * as React from 'react';
 import pascalCase from 'just-pascal-case';
-import typeOf from 'just-typeof';
 import fromEntries from 'fromentries';
 
 import { createStore, isStore } from './store';
+import parseProps from './parseProps';
 
 const readWriteHOC = function (store, readablePropNames = [], writeablePropNames = []) {
     return function (Component) {
@@ -129,22 +129,6 @@ const withState = function (...propNames) {
         Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
 
         return ComponentWithState;
-    }
-}
-
-const parseProps = function (propNames) {
-    if (propNames.every((propName) => typeof propName === 'string')) {
-        return [ propNames, propNames ];
-    } else if (propNames.length === 1 && Array.isArray(propNames) && Array.isArray(propNames[0])) {
-        if (propNames[0].every((propName) => typeof propName === 'string')) {
-            return [ propNames[0] , [] ];
-        } else {
-            return parseProps(propNames[0]);
-        }
-    } else if (propNames.length <= 2 && propNames.every((propName) => Array.isArray(propName) || typeOf(propName) === 'null')) {
-        return [ propNames[0] || [], propNames[1] || [] ];
-    } else {
-        throw Error(`Failed to parse props. Rejected arguments of the types ${propNames.map(propName => typeof propName)}`);
     }
 }
 
