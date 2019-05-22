@@ -271,6 +271,74 @@ describe('withState', function () {
 
     });
 
+    it('takes an object of key name assignments, subscribes to the store keys and injects props named corresponding to the renaming in the argument', function () {
+        const Foo = function ({bar}) {
+            return (
+                <div>{bar}</div>
+            )
+        }
+
+        const FooWithState = withState({'foo':'bar'})(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bazzz'});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().bar).toBeDefined();
+        expect(wrapper.find(Foo).props().bar).toBe('bazzz');
+        wrapper.unmount();
+    });
+
+    it('takes an object of writeable key name assignments, subscribes to the store keys and injects props named corresponding to the renaming in the argument', function () {
+        const Foo = function ({bar}) {
+            return (
+                <div>{bar}</div>
+            )
+        }
+
+        const FooWithState = withState(null, [{'foo':'bar'}])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bazzz'});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().bar).not.toBeDefined();
+        expect(wrapper.find(Foo).props().setBar).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('takes an object of readable and writeable key name assignments, subscribes to the store keys and injects props named corresponding to the renaming in the argument', function () {
+        const Foo = function ({bar, setTheAnswer}) {
+            return (
+                <div>{bar}</div>
+            )
+        }
+
+        const FooWithState = withState([{'foo':'bar'}], [{'answer':'theAnswer'}])(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bazzz'});
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().bar).toBeDefined();
+        expect(wrapper.find(Foo).props().theanswer).not.toBeDefined();
+        expect(wrapper.find(Foo).props().setBar).not.toBeDefined();
+        expect(wrapper.find(Foo).props().setTheAnswer).toBeDefined();
+        wrapper.unmount();
+    });
+
     it('preserves static class properties of the original component', function () {
         class Foo extends React.Component {
             static foo = 'bar';
@@ -315,6 +383,7 @@ describe('withState', function () {
 
         const wrapper = mount(<App />);
         expect(wrapper.find(Foo).props().foo).toBe('bar');
+        wrapper.unmount();
     });
 });
 

@@ -11,9 +11,8 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
 
             constructor(props) {
                 super(props);
-
                 this.state = {
-                    ...fromEntries(readablePropNames.map((propName) => [propName, store[propName]]))
+                    ...fromEntries(readablePropNames.map(([keyName, propName]) => [propName, store[keyName]]))
                 }
 
                 this.updateState = this.updateState.bind(this);
@@ -21,11 +20,11 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
             }
 
             componentDidMount() {
-                readablePropNames.forEach((propName) => store.subscribe(propName, this.updateState));
+                readablePropNames.forEach(([keyName, propName]) => store.subscribe(keyName, this.updateState));
             }
 
             componentWillUnmount() {
-                readablePropNames.forEach((propName) => store.unsubscribe(propName, this.updateState));
+                readablePropNames.forEach(([keyName, propName]) => store.unsubscribe(keyName, this.updateState));
             }
 
             updateState(data) {
@@ -36,11 +35,11 @@ const readWriteHOC = function (store, readablePropNames = [], writeablePropNames
 
             render() {
                 return (
-                    <Component {...(this.state)} {...this.props} {...fromEntries(writeablePropNames.map((propName) => [ 'set' + pascalCase(propName), (value) => {
+                    <Component {...(this.state)} {...this.props} {...fromEntries(writeablePropNames.map(([keyName, propName]) => [ 'set' + pascalCase(propName), (value) => {
                         if (typeof value === 'function') {
-                            store[propName] = value(store[propName]);
+                            store[keyName] = value(store[keyName]);
                         } else {
-                            store[propName] = value
+                            store[keyName] = value
                         }
                     } ] )) } />
                 )
@@ -106,7 +105,7 @@ const withState = function (...propNames) {
 
         const ComponentWithState = function (props) {
 
-            const conflictingNames = parsedProps.flat().filter(name => props.hasOwnProperty(name));
+            const conflictingNames = parsedProps.flat().filter(([, propName]) => props.hasOwnProperty(propName));
 
             if (conflictingNames.length > 0) {
                 throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
