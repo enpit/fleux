@@ -67,7 +67,7 @@ const connect = function (Component, value) {
         render() {
             return (
                 <context.Provider value={store}>
-                    <Component />
+                    <Component {...this.props} />
                 </context.Provider>
             )
         }
