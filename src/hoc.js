@@ -98,27 +98,27 @@ const withStore = function (store, ...propNames) {
     }
 }
 
+const statefulComponentFactory = function (Component) {
+    const ComponentWithState = function (props) {
+        const ComponentWithContext = withContext(function ({context, ...props}) {
+            return (
+                <Component store={context} {...props} />
+            );
+        });
+
+        return (
+            <ComponentWithContext {...props} />
+        );
+    }
+
+    Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
+
+    return ComponentWithState;
+};
+
 const withState = function (...args) {
 
     if (args.length === 0 || typeof args[0] === 'function') {
-
-        const statefulComponentFactory = function (Component) {
-            const ComponentWithState = function (props) {
-                const ComponentWithContext = withContext(function ({context, ...props}) {
-                    return (
-                        <Component store={context} {...props} />
-                    );
-                });
-
-                return (
-                    <ComponentWithContext {...props} />
-                );
-            }
-
-            Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
-
-            return ComponentWithState;
-        };
 
         if (typeof args[0] === 'function') {
 
