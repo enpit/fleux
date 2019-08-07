@@ -45,6 +45,30 @@ describe('connect', function () {
         const wrapper = render(<AppWithState />);
         expect(wrapper.text()).toBe('Foo');
     });
+
+    it('should return a component that passes through props to the original component', function () {
+        const App = function ({foo}) {
+            return (
+                <div>{foo}</div>
+            )
+        }
+
+        const AppWithState = connect(App, {});
+        const wrapper = render(<AppWithState foo="bar" />);
+        expect(wrapper.text()).toBe('bar');
+    });
+
+    it('should throw when being called without a store object', function () {
+        const App = function ({foo}) {
+            return (
+                <div>{foo}</div>
+            )
+        }
+
+        expect(() => {
+            const AppWithState = connect(App);
+        }).toThrow();
+    });
 });
 
 describe('withState', function () {
