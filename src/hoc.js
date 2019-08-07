@@ -98,13 +98,11 @@ const withStore = function (store, ...propNames) {
     }
 }
 
-const withState = function (...propNames) {
+const withState = function (...args) {
 
-    const parsedProps = parseProps(propNames);
+    if (args.length === 0 || typeof args[0] === 'function') {
 
-    if (propNames.length === 0) {
-
-        return function (Component) {
+        const statefulComponentFactory = function (Component) {
             const ComponentWithState = function (props) {
                 const ComponentWithContext = withContext(function ({context, ...props}) {
                     return (
@@ -120,9 +118,19 @@ const withState = function (...propNames) {
             Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
 
             return ComponentWithState;
+        };
+
+        if (typeof args[0] === 'function') {
+
+            return statefulComponentFactory(args[0])
+
+        } else {
+            return statefulComponentFactory;
         }
 
     } else {
+
+        const parsedProps = parseProps(args);
 
         return function (Component) {
 
