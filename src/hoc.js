@@ -57,6 +57,10 @@ const connect = function (Component, value) {
 
     var store;
 
+    if (typeof value === 'undefined') {
+        throw new TypeError('Failed to connect component: Refusing to connect without a store. If you want to use an empty store, pass `{}` to `connect`.');
+    }
+
     if (isStore(value)) {
         store = value;
     } else {
@@ -67,7 +71,7 @@ const connect = function (Component, value) {
         render() {
             return (
                 <context.Provider value={store}>
-                    <Component />
+                    <Component {...this.props} />
                 </context.Provider>
             )
         }
