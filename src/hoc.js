@@ -102,33 +102,58 @@ const withState = function (...propNames) {
 
     const parsedProps = parseProps(propNames);
 
-    return function (Component) {
+    if (propNames.length === 0) {
 
-        const ComponentWithState = function (props) {
-
-            const conflictingNames = parsedProps.flat().filter(name => props.hasOwnProperty(name));
-
-            if (conflictingNames.length > 0) {
-                throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
-            }
-
-            const ComponentWithContext = withContext(function ({context, ...props}) {
-                const ComponentWithStore = readWriteHOC(context, ...parsedProps)(Component);
+        return function (Component) {
+            const ComponentWithState = function (props) {
+                const ComponentWithContext = withContext(function ({context, ...props}) {
+                    return (
+                        <Component store={context} {...props} />
+                    );
+                });
 
                 return (
-                    <ComponentWithStore {...props} />
+                    <ComponentWithContext {...props} />
                 );
-            });
+            }
 
-            return (
-                <ComponentWithContext {...props} />
-            );
+            Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
 
-        };
+            return ComponentWithState;
+        }
 
-        Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
+    } else {
 
-        return ComponentWithState;
+        return function (Component) {
+
+            const ComponentWithState = function (props) {
+
+                const conflictingNames = parsedProps.flat().filter(name => props.hasOwnProperty(name));
+
+                if (conflictingNames.length > 0) {
+                    throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
+                }
+
+                const ComponentWithContext = withContext(function ({context, ...props}) {
+                    const ComponentWithStore = readWriteHOC(context, ...parsedProps)(Component);
+
+                    return (
+                        <ComponentWithStore {...props} />
+                    );
+                });
+
+                return (
+                    <ComponentWithContext {...props} />
+                );
+
+            };
+
+            Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
+
+            return ComponentWithState;
+
+        }
+
     }
 }
 
