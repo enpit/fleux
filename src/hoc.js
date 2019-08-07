@@ -103,10 +103,21 @@ const withStore = function (store, ...propNames) {
 }
 
 const statefulComponentFactory = function (Component) {
+
     const ComponentWithState = function (props) {
         const ComponentWithContext = withContext(function ({context, ...props}) {
+
+            class StatefulComponent extends React.Component {
+                render() {
+                    context.currentlyRenderingComponent = this;
+                    const renderOutput = Component(this.props);
+                    context.currentlyRenderingComponent = undefined;
+                    return renderOutput;
+                }
+            }
+
             return (
-                <Component store={context} {...props} />
+                <StatefulComponent store={context} {...props} />
             );
         });
 

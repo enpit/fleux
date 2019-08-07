@@ -60,12 +60,55 @@ const createStore = function (initialValues = {}) {
         create: {
             enumerable: false,
             value: create
+        },
+        currentlyRenderingComponent: {
+            enumerable: false,
+            value: undefined,
+            writable: true
         }
     });
 
     Object.entries(initialValues).forEach(([name, value]) => create(name, value));
 
-    return store;
+    const handler = (function () {
+
+        const props = {};
+
+        return {
+            get: function (target, prop) {
+                const currentlyRenderingComponent = target.currentlyRenderingComponent;
+                if (typeof currentlyRenderingComponent === 'undefined') {
+                    return target[prop];
+                }
+
+                if (typeof props[prop] === 'undefined') {
+                    props[prop] = [currentlyRenderingComponent];
+                }
+
+                if (props[prop].indexOf(currentlyRenderingComponent) === -1) {
+                    props[prop].push(currentlyRenderingComponent);
+                }
+
+                return target[prop];
+            },
+            set: function (target, prop, value) {
+                if (prop === 'currentlyRenderingComponent') { target.currentlyRenderingComponent = value; return true; }
+                target[prop] = value;
+
+                if (typeof props[prop] === 'undefined') {
+                    return true;
+                }
+
+                for (let component of props[prop]) {
+                    component.forceUpdate();
+                }
+
+                return true;
+            }
+        };
+    }());
+
+    return new Proxy(store, handler)
 
 };
 
