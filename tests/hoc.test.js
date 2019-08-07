@@ -57,6 +57,18 @@ describe('connect', function () {
         const wrapper = render(<AppWithState foo="bar" />);
         expect(wrapper.text()).toBe('bar');
     });
+
+    it('should throw when being called without a store object', function () {
+        const App = function ({foo}) {
+            return (
+                <div>{foo}</div>
+            )
+        }
+
+        expect(() => {
+            const AppWithState = connect(App);
+        }).toThrow();
+    });
 });
 
 describe('withState', function () {
