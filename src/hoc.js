@@ -4,6 +4,7 @@ import typeOf from 'just-typeof';
 import fromEntries from 'fromentries';
 
 import { createStore, isStore } from './store';
+import * as SYMBOLS from './symbols';
 
 const readWriteHOC = function (store, readablePropNames = [], writeablePropNames = []) {
     return function (Component) {
@@ -104,20 +105,33 @@ const withStore = function (store, ...propNames) {
 
 const statefulComponentFactory = function (Component) {
 
+    var currentlyRenderingComponent = undefined;
+
+    const handler = {
+        get: function (target, prop) {
+            return target[SYMBOLS.STORE_GET](prop, currentlyRenderingComponent);
+        }
+    }
+
     const ComponentWithState = function (props) {
         const ComponentWithContext = withContext(function ({context, ...props}) {
 
+            const localProxy = new Proxy(context, handler);
+
             class StatefulComponent extends React.Component {
+                constructor(props) {
+                    super(props);
+                    currentlyRenderingComponent = this;
+                }
                 render() {
-                    context.currentlyRenderingComponent = this;
-                    const renderOutput = Component(this.props);
-                    context.currentlyRenderingComponent = undefined;
-                    return renderOutput;
+                    return (
+                        <Component {...this.props} />
+                    );
                 }
             }
 
             return (
-                <StatefulComponent store={context} {...props} />
+                <StatefulComponent store={localProxy} {...props} />
             );
         });
 

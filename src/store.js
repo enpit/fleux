@@ -1,3 +1,5 @@
+import * as SYMBOLS from './symbols';
+
 const createStore = function (initialValues = {}) {
 
     const values = {};
@@ -48,6 +50,8 @@ const createStore = function (initialValues = {}) {
         });
     };
 
+    const props = {};
+
     Object.defineProperties(store, {
         subscribe: {
             enumerable: false,
@@ -61,38 +65,37 @@ const createStore = function (initialValues = {}) {
             enumerable: false,
             value: create
         },
-        currentlyRenderingComponent: {
+        [SYMBOLS.STORE_GET]: {
             enumerable: false,
-            value: undefined,
-            writable: true
+            value: function (prop, currentlyRenderingComponent) {
+
+                if (typeof currentlyRenderingComponent !== 'undefined') {
+
+                    if (typeof props[prop] === 'undefined') {
+                        props[prop] = [currentlyRenderingComponent];
+                    }
+
+                    if (!props.hasOwnProperty(prop)) {
+                        return this[prop];
+                    }
+
+                    if (props[prop].indexOf(currentlyRenderingComponent) === -1) {
+                        props[prop].push(currentlyRenderingComponent);
+                    }
+
+                }
+
+                return this[prop];
+            }
         }
     });
 
     Object.entries(initialValues).forEach(([name, value]) => create(name, value));
 
     const handler = (function () {
-
-        const props = {};
-
         return {
-            get: function (target, prop) {
-                const currentlyRenderingComponent = target.currentlyRenderingComponent;
-                if (typeof currentlyRenderingComponent === 'undefined') {
-                    return target[prop];
-                }
-
-                if (typeof props[prop] === 'undefined') {
-                    props[prop] = [currentlyRenderingComponent];
-                }
-
-                if (props[prop].indexOf(currentlyRenderingComponent) === -1) {
-                    props[prop].push(currentlyRenderingComponent);
-                }
-
-                return target[prop];
-            },
             set: function (target, prop, value) {
-                if (prop === 'currentlyRenderingComponent') { target.currentlyRenderingComponent = value; return true; }
+
                 target[prop] = value;
 
                 if (typeof props[prop] === 'undefined') {
