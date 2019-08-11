@@ -6,51 +6,6 @@ import fromEntries from 'fromentries';
 import { createStore, isStore } from './store';
 import * as SYMBOLS from './symbols';
 
-const readWriteHOC = function (store, readablePropNames = [], writeablePropNames = []) {
-    return function (Component) {
-        return class extends React.Component {
-
-            constructor(props) {
-                super(props);
-
-                this.state = {
-                    ...fromEntries(readablePropNames.map((propName) => [propName, store[propName]]))
-                }
-
-                this.updateState = this.updateState.bind(this);
-
-            }
-
-            componentDidMount() {
-                readablePropNames.forEach((propName) => store.subscribe(propName, this.updateState));
-            }
-
-            componentWillUnmount() {
-                readablePropNames.forEach((propName) => store.unsubscribe(propName, this.updateState));
-            }
-
-            updateState(data) {
-                this.setState({
-                    ...data
-                })
-            }
-
-            render() {
-                return (
-                    <Component {...(this.state)} {...this.props} {...fromEntries(writeablePropNames.map((propName) => [ 'set' + pascalCase(propName), (value) => {
-                        if (typeof value === 'function') {
-                            store[propName] = value(store[propName]);
-                        } else {
-                            store[propName] = value
-                        }
-                    } ] )) } />
-                )
-            }
-
-        }
-    }
-}
-
 const context = React.createContext();
 const defaultStore = createStore();
 
@@ -122,6 +77,7 @@ const statefulComponentFactory = function (Component) {
                 constructor(props) {
                     super(props);
                     currentlyRenderingComponent = this;
+                    this.state = {};
                 }
                 render() {
                     return (
@@ -133,6 +89,7 @@ const statefulComponentFactory = function (Component) {
             return (
                 <StatefulComponent store={localProxy} {...props} />
             );
+
         });
 
         return (
@@ -143,6 +100,7 @@ const statefulComponentFactory = function (Component) {
     Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
 
     return ComponentWithState;
+
 };
 
 const withState = function (...args) {
@@ -150,9 +108,7 @@ const withState = function (...args) {
     if (args.length === 0 || typeof args[0] === 'function') {
 
         if (typeof args[0] === 'function') {
-
             return statefulComponentFactory(args[0])
-
         } else {
             return statefulComponentFactory;
         }
@@ -171,16 +127,31 @@ const withState = function (...args) {
                     throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
                 }
 
-                const ComponentWithContext = withContext(function ({context, ...props}) {
-                    const ComponentWithStore = readWriteHOC(context, ...parsedProps)(Component);
+                const explicitlyBoundComponent = function ({store}) {
+
+                    const readablePropNames = parsedProps[0];
+                    const writeablePropNames = parsedProps[1];
+
+                    const readableProps = fromEntries(readablePropNames.map((propName) => [propName, store[propName]]));
+
+                    const writeableProps = fromEntries(writeablePropNames.map((propName) => [ 'set' + pascalCase(propName), (value) => {
+                        if (typeof value === 'function') {
+                            store[propName] = value(store[propName]);
+                        } else {
+                            store[propName] = value;
+                        }
+                    } ] ));
 
                     return (
-                        <ComponentWithStore {...props} />
+                        <Component {...props} {...readableProps} {...writeableProps} />
                     );
-                });
+
+                }
+
+                const StatefulComponent = statefulComponentFactory(explicitlyBoundComponent);
 
                 return (
-                    <ComponentWithContext {...props} />
+                    <StatefulComponent {...props} />
                 );
 
             };
