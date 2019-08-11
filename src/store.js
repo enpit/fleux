@@ -103,7 +103,7 @@ const createStore = function (initialValues = {}) {
                 }
 
                 for (let component of props[prop]) {
-                    component.forceUpdate();
+                    component.setState({[prop]:value})
                 }
 
                 return true;
