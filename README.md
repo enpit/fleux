@@ -93,7 +93,21 @@ If a component only mutates a value in the store without needing to read it, it 
 withState(null, ['toBeWritten'])
 ```
 
-If one of the first two arguments to `withState` is an array, the function assumes the first argument to be an array of readable keys from the store and the second to be a list of writeable keys. A component will only receive the props for reading or writing, and will not be rerendered when a value changes, that the component does not read.
+If one of the first two arguments to `withState` is an array, the function assumes the first argument to be an array of readable keys from the store and the second to be a list of writeable keys. A component will not be rerendered when a value changes, that the component does not read.
+
+### Connecting a store
+
+In the examples above, there was no point at which the app was connected to a store. This is possible in **fleux** for brevity's sake, but not recommended as all the components will reuse the same default store.
+
+You can and should connect a store to a subtree in your application using the `connect` method like this:
+
+```js
+const AppWithStore = connect(App, { counter: 0 })
+```
+
+**fleux** takes care of making the store that is connected to `App` to all of its children.
+
+You can provide default values for store keys in the object that is passed to `connect` as a second argument.
 
 ### Direct Access
 
@@ -106,7 +120,7 @@ import { createStore } from 'fleux';
 const store = createStore();
 ```
 
-(It should be noted that in general it is not recommended to create a store without initializing any values).
+(In general it is not recommended to create a store without initializing any values).
 
 You can now access your state as properties on the store (accessor properties behind the scenes take care of the rest). The store offers a small API for subscribing to changes like this:
 
@@ -116,4 +130,3 @@ store.foo = 'bar'; // logs 'bar'
 ```
 
 This direct store access allows you to connect the state store used in your React components to other parts of your application.
-
