@@ -121,7 +121,7 @@ const withState = function (...args) {
 
             const ComponentWithState = function (props) {
 
-                const conflictingNames = parsedProps.flat().filter(name => props.hasOwnProperty(name));
+                const conflictingNames = parsedProps.flat().filter(name => props.hasOwnProperty(name) || props.hasOwnProperty('set' + pascalCase(name)));
 
                 if (conflictingNames.length > 0) {
                     throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);

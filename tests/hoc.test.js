@@ -731,9 +731,8 @@ describe('global state', function () {
         }
         const AppWithStateTheThird = connect(AppTheThird, {foo: 'bar'});
 
-        // ! This should actually fail, but the required internal checks are not yet implemented.
         expect(() => {
             const wrapper = mount(<AppWithStateTheThird />);
-        }).not.toThrow();
+        }).toThrow();
     });
 });
