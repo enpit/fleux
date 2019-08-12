@@ -65,6 +65,11 @@ const createStore = function (initialValues = {}) {
             enumerable: false,
             value: create
         },
+        [SYMBOLS.STORE_MARKER]: {
+            enumerable: false,
+            writable: false,
+            value: true
+        },
         [SYMBOLS.STORE_GET]: {
             enumerable: false,
             value: function (prop, currentlyRenderingComponent) {
@@ -116,7 +121,8 @@ const createStore = function (initialValues = {}) {
 };
 
 const isStore = function (obj) {
-    return typeof obj.subscribe === 'function'
+    return obj[SYMBOLS.STORE_MARKER] === true
+        && typeof obj.subscribe === 'function'
         && typeof obj.unsubscribe === 'function'
         && typeof obj.create === 'function';
 }
