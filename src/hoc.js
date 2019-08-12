@@ -36,7 +36,7 @@ const connect = function (Component, value) {
 
 const withContext = function (Component) {
 
-    class ComponentWithContext extends React.Component {
+    class ContextWrapper extends React.Component {
         render() {
             const value = this.context || defaultStore;
             return (
@@ -45,9 +45,9 @@ const withContext = function (Component) {
         }
     }
 
-    ComponentWithContext.contextType = context;
+    ContextWrapper.contextType = context;
 
-    return ComponentWithContext;
+    return ContextWrapper;
 }
 
 const withStore = function (store, ...propNames) {
