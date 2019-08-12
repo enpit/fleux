@@ -68,34 +68,28 @@ const statefulComponentFactory = function (Component) {
         }
     }
 
-    const ComponentWithState = function (props) {
-        const ComponentWithContext = withContext(function ({context, ...props}) {
+    const ComponentWithState = withContext(function ComponentWithContext ({context, ...props}) {
 
-            const localProxy = new Proxy(context, handler);
+        const localProxy = new Proxy(context, handler);
 
-            class StatefulComponent extends React.Component {
-                constructor(props) {
-                    super(props);
-                    currentlyRenderingComponent = this;
-                    this.state = {};
-                }
-                render() {
-                    return (
-                        <Component {...this.props} />
-                    );
-                }
+        class ComponentWithStore extends React.Component {
+            constructor(props) {
+                super(props);
+                currentlyRenderingComponent = this;
+                this.state = {};
             }
-
-            return (
-                <StatefulComponent store={localProxy} {...props} />
-            );
-
-        });
+            render() {
+                return (
+                    <Component store={localProxy} {...this.props} />
+                );
+            }
+        }
 
         return (
-            <ComponentWithContext {...props} />
+            <ComponentWithStore {...props} />
         );
-    }
+
+    });
 
     Object.entries(Component).forEach(([key, value]) => ComponentWithState[key] = value);
 
