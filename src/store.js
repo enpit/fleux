@@ -1,3 +1,5 @@
+import * as SYMBOLS from './symbols';
+
 const createStore = function (initialValues = {}) {
 
     const values = {};
@@ -48,6 +50,8 @@ const createStore = function (initialValues = {}) {
         });
     };
 
+    const props = {};
+
     Object.defineProperties(store, {
         subscribe: {
             enumerable: false,
@@ -60,12 +64,54 @@ const createStore = function (initialValues = {}) {
         create: {
             enumerable: false,
             value: create
+        },
+        [SYMBOLS.STORE_GET]: {
+            enumerable: false,
+            value: function (prop, currentlyRenderingComponent) {
+
+                if (typeof currentlyRenderingComponent !== 'undefined') {
+
+                    if (typeof props[prop] === 'undefined') {
+                        props[prop] = [currentlyRenderingComponent];
+                    }
+
+                    if (!props.hasOwnProperty(prop)) {
+                        return this[prop];
+                    }
+
+                    if (props[prop].indexOf(currentlyRenderingComponent) === -1) {
+                        props[prop].push(currentlyRenderingComponent);
+                    }
+
+                }
+
+                return this[prop];
+            }
         }
     });
 
     Object.entries(initialValues).forEach(([name, value]) => create(name, value));
 
-    return store;
+    const handler = (function () {
+        return {
+            set: function (target, prop, value) {
+
+                target[prop] = value;
+
+                if (typeof props[prop] === 'undefined') {
+                    return true;
+                }
+
+                for (let component of props[prop]) {
+                    component.setState({[prop]:value})
+                }
+
+                return true;
+            }
+        };
+    }());
+
+    return new Proxy(store, handler)
 
 };
 

@@ -295,6 +295,228 @@ describe('withState', function () {
 
     });
 
+    it('returns a factory for implicitly bound components when called with no arguments', function () {
+        const Foo = function ({store}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState()(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const wrapper = mount(<App />);
+        expect(wrapper.find(Foo).props().store).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('returns a factory for implicitly bound components when called with a component as an argument', function () {
+        const Foo = function ({store}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const wrapper = mount(<App />);
+        expect(wrapper.find(Foo).props().store).toBeDefined();
+        wrapper.unmount();
+    });
+
+    it('create implicit prop bindings when called with a component as an argument', function () {
+        const Foo = function ({store}) {
+            return (
+                <div>{store.foo}</div>
+            )
+        }
+
+        const FooWithState = withState(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {foo:'bar'});
+
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().store).toBeDefined();
+        expect(wrapper.text()).toBe('bar');
+        wrapper.unmount();
+    });
+
+    it('create implicit prop bindings that receive updates when called with a component as an argument', function () {
+        const Foo = function ({store}) {
+            return (
+                <div>{store.foo}</div>
+            )
+        }
+
+        const FooWithState = withState(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const store = createStore({foo:'bar'});
+        const AppWithState = connect(App, store);
+
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().store).toBeDefined();
+
+        store.foo = 'bazzz';
+        expect(wrapper.text()).toBe('bazzz');
+        wrapper.unmount();
+    });
+
+    it('create implicit prop bindings that update the store when called with a component as an argument', function () {
+        const Foo = function ({store}) {
+            store.foo = 'bazzz'
+            return (
+                <div>{store.foo}</div>
+            )
+        }
+
+        const FooWithState = withState(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const store = createStore({foo:'bar'});
+        const AppWithState = connect(App, store);
+
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().store).toBeDefined();
+        expect(store.foo).toBe('bazzz');
+        wrapper.unmount();
+    });
+
+    it('create implicit prop bindings that generate updates when called with a component as an argument', function () {
+        const Foo = function ({store}) {
+            store.foo = 'bazzz'
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState(Foo);
+
+        const Bar = function ({store}) {
+            return (
+                <div>{store.foo}</div>
+            )
+        }
+
+        const BarWithState = withState(Bar);
+
+        const App = function () {
+            return (
+                <>
+                    <FooWithState />
+                    <BarWithState />
+                </>
+            )
+        }
+
+        const store = createStore({foo:'bar'});
+        const AppWithState = connect(App, store);
+
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().store).toBeDefined();
+        expect(wrapper.find(Bar).text()).toBe('bazzz');
+        wrapper.unmount();
+    });
+
+    it('create implicit prop bindings that generate updates which can be received by explicitly bound components when called with a component as an argument', function () {
+        const Foo = function ({store}) {
+            store.foo = 'bazzz'
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState(Foo);
+
+        const Bar = function ({foo}) {
+            return (
+                <div>{foo}</div>
+            )
+        }
+
+        const BarWithState = withState('foo')(Bar);
+
+        const App = function () {
+            return (
+                <>
+                    <FooWithState />
+                    <BarWithState />
+                </>
+            )
+        }
+
+        const store = createStore({foo:'bar'});
+        const AppWithState = connect(App, store);
+
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().store).toBeDefined();
+        expect(wrapper.find(Bar).text()).toBe('bazzz');
+        wrapper.unmount();
+    });
+
+    it('create implicit prop bindings that receive updates which are generated by explicitly bound components when called with a component as an argument', function () {
+        const Foo = function ({setFoo}) {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState('foo')(Foo);
+
+        const Bar = function ({store}) {
+            return (
+                <div>{store.foo}</div>
+            )
+        }
+
+        const BarWithState = withState(Bar);
+
+        const App = function () {
+            return (
+                <>
+                    <FooWithState />
+                    <BarWithState />
+                </>
+            )
+        }
+
+        const store = createStore({foo:'bar'});
+        const AppWithState = connect(App, store);
+
+        const wrapper = mount(<AppWithState />);
+        wrapper.find(Foo).props().setFoo('bazzz');
+        expect(wrapper.find(Bar).props().store).toBeDefined();
+        expect(wrapper.find(Bar).text()).toBe('bazzz');
+        wrapper.unmount();
+    });
+
     it('preserves static class properties of the original component', function () {
         class Foo extends React.Component {
             static foo = 'bar';
@@ -310,7 +532,39 @@ describe('withState', function () {
         expect(FooWithState.foo).toBe('bar');
     });
 
-    it('uses the default store if rendered in a subtree without a connected store', function () {
+    it('uses the default store if rendered in a subtree without a connected store (implicitly bound props)', function () {
+        const Foo = function ({store}) {
+            return (
+                <div>{store.foo}</div>
+            )
+        }
+
+        const FooWithState = withState(Foo);
+
+        const FooSetter = function ({store}) {
+            return (
+                <div>setter</div>
+            )
+        }
+
+        const FooSetterWithState = withState(FooSetter);
+
+        const App = function () {
+            return (
+                <div>
+                    <FooSetterWithState />
+                    <FooWithState />
+                </div>
+            )
+        }
+
+        const wrapper = mount(<App />);
+        wrapper.find(FooSetter).props().store.foo = 'bar';
+        expect(wrapper.find(Foo).props().store.foo).toBe('bar');
+        wrapper.unmount();
+    });
+
+    it('uses the default store if rendered in a subtree without a connected store (explicitily bound props)', function () {
         const Foo = function ({foo}) {
             return (
                 <div>{foo}</div>
@@ -320,7 +574,6 @@ describe('withState', function () {
         const FooWithState = withState('foo')(Foo);
 
         const FooSetter = function ({setFoo}) {
-            setFoo('bar');
             return (
                 <div>setter</div>
             )
@@ -338,7 +591,9 @@ describe('withState', function () {
         }
 
         const wrapper = mount(<App />);
-        expect(wrapper.find(Foo).props().foo).toBe('bar');
+        wrapper.find(FooSetter).props().setFoo('bang');
+        expect(wrapper.find(Foo).text()).toBe('bang');
+        wrapper.unmount();
     });
 });
 
@@ -410,6 +665,7 @@ describe('global state', function () {
 
         setFooProp('bazzz');
         expect(wrapper.find(Foo).text()).toBe('bazzz');
+        wrapper.unmount();
     });
 
     it('should pass on any props the parent passes to a stateful components', function () {
@@ -430,6 +686,7 @@ describe('global state', function () {
         const AppWithState = connect(App, {foo: 'bar'});
         const wrapper = mount(<AppWithState />);
         expect(wrapper.find(Foo).text()).toBe('42');
+        wrapper.unmount();
     });
 
     it('should throw an error if a prop name that is passed to a stateful component conflicts with a key from the store', function () {
