@@ -31,24 +31,23 @@ import React from 'react';
 import { render } from 'react-dom';
 import { connect, withState } from 'fleux';
 
-// Write your component as you would do if it were just taking props.
+// Write your component using a `store` prop.
 const CounterDisplay = function ({store}) {
     return (
         <div>Counter is {store.counter}</div>
     )
 }
 
-// Use the `withState` HOC to have your component consume a value from the store.
+// Use the `withState` HOC to bind store keys into your component.
 const CounterDisplayWithState = withState(CounterDisplay);
 
-// For a component to be able to alter data in the store, it can use a corresponding setter function.
+// Writing to the store will trigger updates in components that read the key that is written to.
 const CounterButton = function ({store}) {
     return (
         <button onClick={() => store.counter = store.counter + 1}>Count</button>
     )
 }
 
-// Again, just use `withState`, which injects the setter prop into your component.
 const CounterButtonWithState = withState(CounterButton);
 
 // Define your app and include the stateful components.
@@ -83,17 +82,16 @@ const CounterDisplay = function ({counter}) {
     )
 }
 
-// Use the `withState` HOC to have your component consume a value from the store.
+// Use the `withState` HOC to bind store keys to your component.
 const CounterDisplayWithState = withState('counter')(CounterDisplay);
 
-// For a component to be able to alter data in the store, it can use a corresponding setter function.
+// Your components receive setter functions that can be used to write to store keys
 const CounterButton = function ({setCounter}) {
     return (
         <button onClick={() => setCounter((counter) => counter+1)}>Count</button>
     )
 }
 
-// Again, just use `withState`, which injects the setter prop into your component.
 const CounterButtonWithState = withState('counter')(CounterButton);
 
 // Define your app and include the stateful components.
