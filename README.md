@@ -24,7 +24,52 @@ npm i fleux
 
 ## Basic Usage
 
-The following basic example shows you how to use **fleux** to implement a little counter:
+The following shows a basic example of how you can use **fleux** to implement a counter:
+
+```js
+import React from 'react';
+import { render } from 'react-dom';
+import { connect, withState } from 'fleux';
+
+// Write your component as you would do if it were just taking props.
+const CounterDisplay = function ({store}) {
+    return (
+        <div>Counter is {store.counter}</div>
+    )
+}
+
+// Use the `withState` HOC to have your component consume a value from the store.
+const CounterDisplayWithState = withState(CounterDisplay);
+
+// For a component to be able to alter data in the store, it can use a corresponding setter function.
+const CounterButton = function ({store}) {
+    return (
+        <button onClick={() => store.counter = store.counter + 1}>Count</button>
+    )
+}
+
+// Again, just use `withState`, which injects the setter prop into your component.
+const CounterButtonWithState = withState(CounterButton);
+
+// Define your app and include the stateful components.
+const App = function () {
+    return (
+        <div>
+            <CounterDisplayWithState />
+            <CounterButtonWithState />
+        </div>
+    )
+}
+
+// Render your app to the page and enjoy the stateful components in action!
+render(<Root />, document.getElementById('root'));
+```
+
+Using `withState` you get reference to a data store injected to your components as a prop. When reading keys from the store object, it automatically subscribes your component to updates of that key.
+
+### Explicit Prop Binding
+
+In the previous example the `CounterButton` also receives updates of the counter variable and gets rerendered, which is not necessary as it does not actually needs to read the value. To specify, which store keys should be bound to component props explicitly, **fleux** allows you to pass in a list of store keys or lists of read-only and write-only store keys.
 
 ```js
 import React from 'react';
@@ -61,14 +106,9 @@ const App = function () {
     )
 }
 
-// Connect the root component of your app to a data store, initializing it with some data.
-const Root = connect(App, { counter: 0 })
-
 // Render your app to the page and enjoy the stateful components in action!
 render(<Root />, document.getElementById('root'));
 ```
-
-### Mutating State
 
 Your components don't need to use actions to mutate the state in the store, but can use a setter function that is injected into their props.
 
