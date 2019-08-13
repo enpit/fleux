@@ -3,36 +3,11 @@ import pascalCase from 'just-pascal-case';
 import typeOf from 'just-typeof';
 import fromEntries from 'fromentries';
 
-import { createStore, isStore } from './store';
+import { createStore } from './store';
+import context from './context';
 import * as SYMBOLS from './symbols';
 
-const context = React.createContext();
 const defaultStore = createStore();
-
-const connect = function (Component, value) {
-
-    var store;
-
-    if (typeof value === 'undefined') {
-        throw new TypeError('Failed to connect component: Refusing to connect without a store. If you want to use an empty store, pass `{}` to `connect`.');
-    }
-
-    if (isStore(value)) {
-        store = value;
-    } else {
-        store = createStore(value);
-    }
-
-    return class extends React.Component {
-        render() {
-            return (
-                <context.Provider value={store}>
-                    <Component {...this.props} />
-                </context.Provider>
-            )
-        }
-    }
-}
 
 const withContext = function (Component) {
 
@@ -48,14 +23,6 @@ const withContext = function (Component) {
     ContextWrapper.contextType = context;
 
     return ContextWrapper;
-}
-
-const withStore = function (store, ...propNames) {
-    if (propNames.every((propName) => typeof propName === 'string')) {
-        return readWriteHOC(store, propNames, propNames);
-    } else if (propNames.length <= 2 && propNames.every((propName) => Array.isArray(propName))) {
-        return readWriteHOC(store, propNames[0] || [], propNames[1] || []);
-    }
 }
 
 const statefulComponentFactory = function (Component) {
@@ -175,4 +142,4 @@ const parseProps = function (propNames) {
     }
 }
 
-export { connect, withState, withStore };
+export { withState };
