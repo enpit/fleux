@@ -4,6 +4,8 @@ const createStore = function (initialValues = {}) {
 
     const values = {};
     const callbacks = {};
+    const namedActions = {};
+    const unnamedActions = [];
     const store = {};
 
     const subscribe = function (name, callback) {
@@ -50,6 +52,33 @@ const createStore = function (initialValues = {}) {
         });
     };
 
+    const dispatch = function (action, ...args) {
+        var _action;
+        if (typeof action === 'string') {
+            _action = namedActions[action];
+        } else {
+            _action = action;
+        }
+        const diff = _action(store, ...args);
+        Object.entries(diff).forEach(([key,value]) => proxy[key] = value);
+        return true;
+    };
+
+    const createAction = function (...args) {
+        var action, name;
+        if (typeof args[0] === 'string') {
+            name = args[0];
+            action = args[1];
+            namedActions[name] = action;
+        } else {
+            action = args[0];
+            unnamedActions.push(action);
+        }
+        return function (...args) {
+            return store.dispatch(action, ...args);
+        }
+    };
+
     const props = {};
 
     Object.defineProperties(store, {
@@ -64,6 +93,14 @@ const createStore = function (initialValues = {}) {
         create: {
             enumerable: false,
             value: create
+        },
+        dispatch: {
+            enumerable: false,
+            value: dispatch
+        },
+        createAction: {
+            enumerable: false,
+            value: createAction
         },
         [SYMBOLS.STORE_MARKER]: {
             enumerable: false,
@@ -116,7 +153,9 @@ const createStore = function (initialValues = {}) {
         };
     }());
 
-    return new Proxy(store, handler)
+    const proxy = new Proxy(store, handler);
+
+    return proxy;
 
 };
 
