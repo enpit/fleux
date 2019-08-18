@@ -66,13 +66,9 @@ const statefulComponentFactory = function (Component) {
 
 const withState = function (...args) {
 
-    if (args.length === 0 || typeof args[0] === 'function') {
+    if (args.length === 0) {
 
-        if (typeof args[0] === 'function') {
-            return statefulComponentFactory(args[0])
-        } else {
-            return statefulComponentFactory;
-        }
+        return statefulComponentFactory;
 
     } else {
 
