@@ -99,6 +99,12 @@ const withState = function (...args) {
 
                     const actionProps = actions(store, props);
 
+                    const conflictingNames = Object.keys(actionProps || {}).filter(name => props.hasOwnProperty(name));
+
+                    if (conflictingNames.length > 0) {
+                        throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
+                    }
+
                     return (
                         <Component {...props} {...readableProps} {...writeableProps} {...actionProps} store={store} dispatch={store.dispatch} />
                     );
