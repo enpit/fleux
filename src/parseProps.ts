@@ -5,7 +5,7 @@ import * as SYMBOLS from './symbols';
 
 export default function parseProps (args: any[]): Array<Array<Object> | Object> {
 
-    var readablePropNames = [], writeablePropNames = [], actions = () => {};
+    var readablePropNames = [], writeablePropNames = [], actions = (store, ownProps) => ({});
 
     if (args.every((propName) => typeof propName === 'string')) {
         readablePropNames = args;
@@ -15,7 +15,8 @@ export default function parseProps (args: any[]): Array<Array<Object> | Object> 
     } else if (args.length === 2 && args.every(arg => Array.isArray(arg) || typeOf(arg) === 'null')) {
         readablePropNames = args[0] || [];
         writeablePropNames = args[1] || [];
-    } else if (args.length === 3 && (Array.isArray(args[0]) || typeOf(args[0]) === 'null')) {
+    } else if (args.length === 3 && (Array.isArray(args[0]) || typeOf(args[0]) === 'null') || (typeof args[args.length-1] === 'function' || typeof args[args.length-1] === 'object' || Array.isArray(args[args.length-1]) && args.slice(0,-1).every(arg => typeof arg === 'string'))) {
+
         readablePropNames = args[0] || [];
         writeablePropNames = args[1] || [];
 
