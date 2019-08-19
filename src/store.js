@@ -65,18 +65,27 @@ const createStore = function (initialValues = {}) {
     };
 
     const createAction = function (...args) {
-        var action, name;
+        var action, name, proto;
         if (typeof args[0] === 'string') {
             name = args[0];
-            action = args[1];
-            namedActions[name] = action;
+            proto = args[1];
+            namedActions[name] = proto;
         } else {
-            action = args[0];
-            unnamedActions.push(action);
+            proto = args[0];
+            unnamedActions.push(proto);
         }
-        return function (...args) {
-            return store.dispatch(action, ...args);
-        }
+
+        action = function (...args) {
+            return store.dispatch(proto, ...args);
+        };
+
+        Object.defineProperty(action, SYMBOLS.ACTION_MARKER, {
+            enumerable: false,
+            writable: false,
+            value: true
+        });
+
+        return action;
     };
 
     const props = {};
