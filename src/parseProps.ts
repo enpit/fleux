@@ -5,7 +5,7 @@ import * as SYMBOLS from './symbols';
 
 export default function parseProps (args: any[]): Array<Array<Object> | Object> {
 
-    var readablePropNames = [], writeablePropNames = [], actions = () => {};
+    var readablePropNames = [], writeablePropNames = [], actions = (store, ownProps) => {};
 
     if (args.every((propName) => typeof propName === 'string')) {
         readablePropNames = args;
