@@ -6,6 +6,7 @@ import fromEntries from 'fromentries';
 import { createStore } from './store';
 import context from './context';
 import * as SYMBOLS from './symbols';
+import parseProps from './parseProps';
 
 const defaultStore = createStore();
 
@@ -72,22 +73,19 @@ const withState = function (...args) {
 
     } else {
 
-        const parsedProps = parseProps(args);
+        const [ readablePropNames, writeablePropNames, actions ] = parseProps(args);
 
         return function (Component) {
 
             const ComponentWithState = function (props) {
 
-                const conflictingNames = parsedProps.flat().filter(name => props.hasOwnProperty(name) || props.hasOwnProperty('set' + pascalCase(name)));
+                const conflictingNames = readablePropNames.filter(name => props.hasOwnProperty(name)).concat(writeablePropNames.filter(name => props.hasOwnProperty('set' + pascalCase(name))));
 
                 if (conflictingNames.length > 0) {
                     throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
                 }
 
                 const explicitlyBoundComponent = function ({store}) {
-
-                    const readablePropNames = parsedProps[0];
-                    const writeablePropNames = parsedProps[1];
 
                     const readableProps = fromEntries(readablePropNames.map((propName) => [propName, store[propName]]));
 
@@ -99,8 +97,10 @@ const withState = function (...args) {
                         }
                     } ] ));
 
+                    const actionProps = actions(store, props);
+
                     return (
-                        <Component {...props} {...readableProps} {...writeableProps} />
+                        <Component {...props} {...readableProps} {...writeableProps} {...actionProps} store={store} dispatch={store.dispatch} />
                     );
 
                 }
@@ -119,22 +119,6 @@ const withState = function (...args) {
 
         }
 
-    }
-}
-
-const parseProps = function (propNames) {
-    if (propNames.every((propName) => typeof propName === 'string')) {
-        return [ propNames, propNames ];
-    } else if (propNames.length === 1 && Array.isArray(propNames) && Array.isArray(propNames[0])) {
-        if (propNames[0].every((propName) => typeof propName === 'string')) {
-            return [ propNames[0] , [] ];
-        } else {
-            return parseProps(propNames[0]);
-        }
-    } else if (propNames.length <= 2 && propNames.every((propName) => Array.isArray(propName) || typeOf(propName) === 'null')) {
-        return [ propNames[0] || [], propNames[1] || [] ];
-    } else {
-        throw Error(`Failed to parse props. Rejected arguments of the types ${propNames.map(propName => typeof propName)}`);
     }
 }
 
