@@ -56,10 +56,20 @@ const createStore = function (initialValues = {}) {
         var _action;
         if (typeof action === 'string') {
             _action = namedActions[action];
-        } else {
+        } else if (action[SYMBOLS.ACTION_MARKER]) {
+            return action(...args);
+        } else if (typeof action === 'function') {
             _action = action;
+        } else {
+            throw new TypeError("Unable to dispatch action of type " + typeof action + ". Action must be a function or an action name string.")
         }
+
         const diff = _action(store, ...args);
+
+        if (typeof diff !== 'object') {
+            throw new TypeError("Unable to merge action return value of type " + typeof diff + " into the store. Return value should be a store slice object. (Did you accidentally dispatch a function that already dispatches internally?)");
+        }
+
         Object.entries(diff).forEach(([key,value]) => proxy[key] = value);
         return true;
     };
