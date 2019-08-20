@@ -186,6 +186,77 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
+    it('takes three array arguments where the third is interpreted as a list of action names that are injected into the component', function () {
+
+        const store = createStore({counter:0});
+        store.createAction('increment', ({counter}, inc) => ({counter:counter+inc}));
+        const Foo = (({increment}) => (<button onClick={() => increment(5)}></button>));
+        const FooWithState = withState([], [], ['increment'])(Foo);
+
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeFunction();
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(5);
+        wrapper.unmount();
+
+    });
+
+    it('takes two arrays and an object as arguments where the third argument is interpreted as a set of action name, action function pairs that are injected into the component', function () {
+
+        const store = createStore({counter:0});
+        const increment = store.createAction(({counter},inc) => ({counter:counter+inc}));
+        const Foo = (({increment}) => (<button onClick={() => increment(6)}></button>));
+        const FooWithState = withState([], [], {increment})(Foo);
+
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBe(increment);
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(6);
+        wrapper.unmount();
+
+    });
+
+    it('takes two arrays and an object as arguments where the third argument is interpreted as a set of action name, function pairs that are injected into the component', function () {
+
+        const store = createStore({counter:0});
+        const increment = ({counter},inc) => ({counter:counter+inc});
+        const Foo = (({increment}) => (<button onClick={() => increment(7)}></button>));
+        const FooWithState = withState([], [], {increment})(Foo);
+
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeFunction();
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(7);
+        wrapper.unmount();
+
+    });
+
+    it('takes two arrays and a function as arguments where the third argument is interpreted as a function that maps \`dispatch\` to an object of prop name, function pairs that are injected into the component', function () {
+
+        const store = createStore({counter:0});
+        const Foo = (({increment}) => (<button onClick={() => increment(8)}></button>));
+        const FooWithState = withState([], [], (dispatch) => ({increment:(inc) => dispatch(({counter},inc) => ({counter:counter+inc}),inc)}))(Foo);
+
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeFunction();
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(8);
+        wrapper.unmount();
+
+    });
+
     it('throws when supplied with a mix of array and string arguments', function () {
         const Foo = function ({foo, setFoo, answer, setAnswer}) {
             return (
