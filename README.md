@@ -133,6 +133,39 @@ withState(null, ['toBeWritten'])
 
 If one of the first two arguments to `withState` is an array, the function assumes the first argument to be an array of readable keys from the store and the second to be a list of writeable keys. A component will not be rerendered when a value changes, that the component does not read.
 
+### Actions
+
+A different way to manipulate store state without reading keys is by using actions. Actions allow you to describe more complex state transitions in a encapsulated way.
+
+**fleux** stores have a `dispatch` method that allows you to execute actions on the store. Basically, you can pass any function to `dispatch`: The action you pass it will receive the store as an argument and its return value will be merged into the store:
+
+```js
+store.counter = 1;
+const increment = ({counter}) => ({counter:counter+1});
+store.dispatch(increment);
+store.counter // 2
+```
+
+If you don't want to call dispatch for some reason (maybe because you want to pass down the action to a child component that is not connected to a store), you can use a store's `createAction` method. It allows you to bind an action to the store.
+
+```js
+store.counter = 1;
+const increment = store.createAction(({counter}) => ({counter:counter+1}));
+increment();
+store.counter // 2
+```
+
+You can optionally name actions using `createAction` as well; this way, you technically don't need to bring the actions into scope anymore.
+
+```js
+store.counter = 1;
+const increment = store.createAction('increment', ({counter}) => ({counter:counter+1}));
+store.dispatch('increment');
+store.counter // 2
+```
+
+In case you want **fleux** to inject actions into your component's props, you can do that too. If you pass three arrays to `withState` the last one will be interpreted as a list of action names, if you pass two arrays and an object the object is interpreted as a mapping of action prop names to actions, and if you pass two arrays and a function, that function is called with `dispatch` and is expected to return an object mapping action prop names to functions that call `dispatch`.
+
 ### Connecting a store
 
 In the examples above, there was no point at which the app was connected to a store. This is possible in **fleux** for brevity's sake, but not recommended as all the components will reuse the same default store.
