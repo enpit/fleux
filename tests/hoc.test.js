@@ -186,100 +186,75 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
-    it('takes an array argument containing an array that is interpreted as a list of readable store keys and correspondingly injected into the component', function () {
-        const Foo = function ({foo, setFoo, answer, setAnswer}) {
-            return (
-                <div>Foo</div>
-            )
-        }
+    it('takes three array arguments where the third is interpreted as a list of action names that are injected into the component', function () {
 
-        const FooWithState = withState([['foo', 'answer']])(Foo);
+        const store = createStore({counter:0});
+        store.createAction('increment', ({counter}, inc) => ({counter:counter+inc}));
+        const Foo = (({increment}) => (<button onClick={() => increment(5)}></button>));
+        const FooWithState = withState([], [], ['increment'])(Foo);
 
-        const App = function () {
-            return (
-                <FooWithState />
-            )
-        }
-
-        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
         const wrapper = mount(<AppWithState />);
-        expect(wrapper.find(Foo).props().foo).toBeDefined()
-        expect(wrapper.find(Foo).props().setFoo).not.toBeDefined();
-        expect(wrapper.find(Foo).props().answer).toBeDefined()
-        expect(wrapper.find(Foo).props().setAnswer).not.toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeFunction();
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(5);
         wrapper.unmount();
+
     });
 
-    it('takes an array argument containing two arrays that are interpreted as lists of readable resp. writeable store keys and correspondingly injected into the component', function () {
-        const Foo = function ({foo, setFoo, answer, setAnswer}) {
-            return (
-                <div>Foo</div>
-            )
-        }
+    it('takes two arrays and an object as arguments where the third argument is interpreted as a set of action name, action function pairs that are injected into the component', function () {
 
-        const FooWithState = withState([['foo'], ['answer']])(Foo);
+        const store = createStore({counter:0});
+        const increment = store.createAction(({counter},inc) => ({counter:counter+inc}));
+        const Foo = (({increment}) => (<button onClick={() => increment(6)}></button>));
+        const FooWithState = withState([], [], {increment})(Foo);
 
-        const App = function () {
-            return (
-                <FooWithState />
-            )
-        }
-
-        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
         const wrapper = mount(<AppWithState />);
-        expect(wrapper.find(Foo).props().foo).toBeDefined()
-        expect(wrapper.find(Foo).props().setFoo).not.toBeDefined();
-        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
-        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBe(increment);
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(6);
         wrapper.unmount();
+
     });
 
-    it('takes an array argument containing `null` and an array that is interpreted as a list of writeable store keys and correspondingly injected into the component', function () {
-        const Foo = function ({foo, setFoo, answer, setAnswer}) {
-            return (
-                <div>Foo</div>
-            )
-        }
+    it('takes two arrays and an object as arguments where the third argument is interpreted as a set of action name, function pairs that are injected into the component', function () {
 
-        const FooWithState = withState([null , ['foo', 'answer']])(Foo);
+        const store = createStore({counter:0});
+        const increment = ({counter},inc) => ({counter:counter+inc});
+        const Foo = (({increment}) => (<button onClick={() => increment(7)}></button>));
+        const FooWithState = withState([], [], {increment})(Foo);
 
-        const App = function () {
-            return (
-                <FooWithState />
-            )
-        }
-
-        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
         const wrapper = mount(<AppWithState />);
-        expect(wrapper.find(Foo).props().foo).not.toBeDefined()
-        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
-        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
-        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeFunction();
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(7);
         wrapper.unmount();
+
     });
 
-    it('takes an array argument containing `undefined` and an array that is interpreted as a list of writeable store keys and correspondingly injected into the component', function () {
-        const Foo = function ({foo, setFoo, answer, setAnswer}) {
-            return (
-                <div>Foo</div>
-            )
-        }
+    it('takes two arrays and a function as arguments where the third argument is interpreted as a function that maps \`dispatch\` to an object of prop name, function pairs that are injected into the component', function () {
 
-        const FooWithState = withState([, ['foo', 'answer']])(Foo);
+        const store = createStore({counter:0});
+        const Foo = (({increment}) => (<button onClick={() => increment(8)}></button>));
+        const FooWithState = withState([], [], (dispatch) => ({increment:(inc) => dispatch(({counter},inc) => ({counter:counter+inc}),inc)}))(Foo);
 
-        const App = function () {
-            return (
-                <FooWithState />
-            )
-        }
-
-        const AppWithState = connect(App, {foo:'bar',answer:42});
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
         const wrapper = mount(<AppWithState />);
-        expect(wrapper.find(Foo).props().foo).not.toBeDefined()
-        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
-        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
-        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeFunction();
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(8);
         wrapper.unmount();
+
     });
 
     it('throws when supplied with a mix of array and string arguments', function () {
@@ -315,34 +290,14 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
-    it('returns a factory for implicitly bound components when called with a component as an argument', function () {
-        const Foo = function ({store}) {
-            return (
-                <div>Foo</div>
-            )
-        }
-
-        const FooWithState = withState(Foo);
-
-        const App = function () {
-            return (
-                <FooWithState />
-            )
-        }
-
-        const wrapper = mount(<App />);
-        expect(wrapper.find(Foo).props().store).toBeDefined();
-        wrapper.unmount();
-    });
-
-    it('create implicit prop bindings when called with a component as an argument', function () {
+    it('create implicit prop bindings when called with no arguments', function () {
         const Foo = function ({store}) {
             return (
                 <div>{store.foo}</div>
             )
         }
 
-        const FooWithState = withState(Foo);
+        const FooWithState = withState()(Foo);
 
         const App = function () {
             return (
@@ -358,14 +313,14 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
-    it('create implicit prop bindings that receive updates when called with a component as an argument', function () {
+    it('create implicit prop bindings that receive updates when called with no arguments', function () {
         const Foo = function ({store}) {
             return (
                 <div>{store.foo}</div>
             )
         }
 
-        const FooWithState = withState(Foo);
+        const FooWithState = withState()(Foo);
 
         const App = function () {
             return (
@@ -384,7 +339,7 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
-    it('create implicit prop bindings that update the store when called with a component as an argument', function () {
+    it('create implicit prop bindings that update the store when called with no arguments', function () {
         const Foo = function ({store}) {
             store.foo = 'bazzz'
             return (
@@ -392,7 +347,7 @@ describe('withState', function () {
             )
         }
 
-        const FooWithState = withState(Foo);
+        const FooWithState = withState()(Foo);
 
         const App = function () {
             return (
@@ -409,7 +364,7 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
-    it('create implicit prop bindings that generate updates when called with a component as an argument', function () {
+    it('create implicit prop bindings that generate updates when called with no arguments', function () {
         const Foo = function ({store}) {
             store.foo = 'bazzz'
             return (
@@ -417,7 +372,7 @@ describe('withState', function () {
             )
         }
 
-        const FooWithState = withState(Foo);
+        const FooWithState = withState()(Foo);
 
         const Bar = function ({store}) {
             return (
@@ -425,7 +380,7 @@ describe('withState', function () {
             )
         }
 
-        const BarWithState = withState(Bar);
+        const BarWithState = withState()(Bar);
 
         const App = function () {
             return (
@@ -445,7 +400,7 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
-    it('create implicit prop bindings that generate updates which can be received by explicitly bound components when called with a component as an argument', function () {
+    it('create implicit prop bindings that generate updates which can be received by explicitly bound components when called with no arguments', function () {
         const Foo = function ({store}) {
             store.foo = 'bazzz'
             return (
@@ -453,7 +408,7 @@ describe('withState', function () {
             )
         }
 
-        const FooWithState = withState(Foo);
+        const FooWithState = withState()(Foo);
 
         const Bar = function ({foo}) {
             return (
@@ -481,7 +436,7 @@ describe('withState', function () {
         wrapper.unmount();
     });
 
-    it('create implicit prop bindings that receive updates which are generated by explicitly bound components when called with a component as an argument', function () {
+    it('create implicit prop bindings that receive updates which are generated by explicitly bound components when called with no arguments', function () {
         const Foo = function ({setFoo}) {
             return (
                 <div>Foo</div>
@@ -496,7 +451,7 @@ describe('withState', function () {
             )
         }
 
-        const BarWithState = withState(Bar);
+        const BarWithState = withState()(Bar);
 
         const App = function () {
             return (
@@ -539,7 +494,7 @@ describe('withState', function () {
             )
         }
 
-        const FooWithState = withState(Foo);
+        const FooWithState = withState()(Foo);
 
         const FooSetter = function ({store}) {
             return (
@@ -547,7 +502,7 @@ describe('withState', function () {
             )
         }
 
-        const FooSetterWithState = withState(FooSetter);
+        const FooSetterWithState = withState()(FooSetter);
 
         const App = function () {
             return (

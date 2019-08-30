@@ -28,6 +28,16 @@ describe('store', function () {
             expect(store).toHaveProperty('unsubscribe');
         });
 
+        it('should have a "createAction" property', function () {
+            const store = createStore();
+            expect(store).toHaveProperty('createAction');
+        });
+
+        it('should have a "dispatch" property', function () {
+            const store = createStore();
+            expect(store).toHaveProperty('dispatch');
+        });
+
         it('should not have any enumerable properties', function () {
             const store = createStore();
             expect(Object.keys(store).length).toBe(0);
@@ -115,7 +125,60 @@ describe('store', function () {
                 store.create('foo', 'baz');
             }).toThrow();
         })
-    })
+    });
+    describe('dispatch', function () {
+        it('should take a function, invoke it and merge the result with the store', function () {
+            const store = createStore();
+            store.dispatch(() => ({foo:'bar'}));
+            expect(store.foo).toBe('bar');
+        });
+        it('should take a function, invoke it with the current store state and merge the result with the store', function () {
+            const store = createStore({foo:42});
+            store.dispatch(({foo}) => ({foo:foo+1}));
+            expect(store.foo).toBe(43);
+        });
+        it('should take an action, invoke it and merge the result with the store', function () {
+            const store = createStore();
+            const setFoo = store.createAction(() => ({foo:'bar'}));
+            store.dispatch(setFoo);
+            expect(store.foo).toBe('bar');
+        });
+        it('should throw if called with a function that internally already calls dispatch', function () {
+            const store = createStore();
+            const setFoo = (_,text) => store.dispatch((_,text) => ({foo:text}), text);
+            expect(() => {
+                store.dispatch(setFoo, 'bar');
+            }).toThrow();
+        });
+        it('should take an action name, invoke it and merge the result with the store', function () {
+            const store = createStore();
+            const setFoo = store.createAction('setFoo', () => ({foo:'bar'}));
+            store.dispatch('setFoo');
+            expect(store.foo).toBe('bar');
+        });
+        it('should take a function, invoke it with any additional arguments and merge the result with the store', function () {
+            const store = createStore();
+            store.dispatch((_,text) => ({foo:text}), 'bar');
+            expect(store.foo).toBe('bar');
+        });
+        it('should take a function, invoke it with the current store state and any additional arguments, and merge the result with the store', function () {
+            const store = createStore({foo:42});
+            store.dispatch(({foo},inc) => ({foo:foo+inc}),1);
+            expect(store.foo).toBe(43);
+        });
+        it('should take an action, invoke it with any additional arguments and merge the result with the store', function () {
+            const store = createStore();
+            const setFoo = store.createAction((_,text) => ({foo:text}));
+            store.dispatch(setFoo, 'bar');
+            expect(store.foo).toBe('bar');
+        });
+        it('should take an action name, invoke it with any additional arguments and merge the result with the store', function () {
+            const store = createStore();
+            const setFoo = store.createAction('setFoo', (_,text) => ({foo:text}));
+            store.dispatch('setFoo', 'bar');
+            expect(store.foo).toBe('bar');
+        });
+    });
 });
 
 describe('subscriptions', function () {

@@ -4,6 +4,8 @@ const createStore = function (initialValues = {}) {
 
     const values = {};
     const callbacks = {};
+    const namedActions = {};
+    const unnamedActions = [];
     const store = {};
 
     const subscribe = function (name, callback) {
@@ -50,6 +52,52 @@ const createStore = function (initialValues = {}) {
         });
     };
 
+    const dispatch = function (action, ...args) {
+        var _action;
+        if (typeof action === 'string') {
+            _action = namedActions[action];
+        } else if (action[SYMBOLS.ACTION_MARKER]) {
+            return action(...args);
+        } else if (typeof action === 'function') {
+            _action = action;
+        } else {
+            throw new TypeError("Unable to dispatch action of type " + typeof action + ". Action must be a function or an action name string.")
+        }
+
+        const diff = _action(store, ...args);
+
+        if (typeof diff !== 'object') {
+            throw new TypeError("Unable to merge action return value of type " + typeof diff + " into the store. Return value should be a store slice object. (Did you accidentally dispatch a function that already dispatches internally?)");
+        }
+
+        Object.entries(diff).forEach(([key,value]) => proxy[key] = value);
+        return true;
+    };
+
+    const createAction = function (...args) {
+        var action, name, proto;
+        if (typeof args[0] === 'string') {
+            name = args[0];
+            proto = args[1];
+            namedActions[name] = proto;
+        } else {
+            proto = args[0];
+            unnamedActions.push(proto);
+        }
+
+        action = function (...args) {
+            return store.dispatch(proto, ...args);
+        };
+
+        Object.defineProperty(action, SYMBOLS.ACTION_MARKER, {
+            enumerable: false,
+            writable: false,
+            value: true
+        });
+
+        return action;
+    };
+
     const props = {};
 
     Object.defineProperties(store, {
@@ -64,6 +112,14 @@ const createStore = function (initialValues = {}) {
         create: {
             enumerable: false,
             value: create
+        },
+        dispatch: {
+            enumerable: false,
+            value: dispatch
+        },
+        createAction: {
+            enumerable: false,
+            value: createAction
         },
         [SYMBOLS.STORE_MARKER]: {
             enumerable: false,
@@ -116,7 +172,9 @@ const createStore = function (initialValues = {}) {
         };
     }());
 
-    return new Proxy(store, handler)
+    const proxy = new Proxy(store, handler);
+
+    return proxy;
 
 };
 
