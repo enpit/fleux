@@ -39,7 +39,7 @@ const CounterDisplay = function ({store}) {
 }
 
 // Use the `withState` HOC to bind store keys into your component.
-const CounterDisplayWithState = withState(CounterDisplay);
+const CounterDisplayWithState = withState()(CounterDisplay);
 
 // Writing to the store will trigger updates in components that read the key that is written to.
 const CounterButton = function ({store}) {
@@ -48,7 +48,7 @@ const CounterButton = function ({store}) {
     )
 }
 
-const CounterButtonWithState = withState(CounterButton);
+const CounterButtonWithState = withState()(CounterButton);
 
 // Define your app and include the stateful components.
 const App = function () {
