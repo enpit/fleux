@@ -73,31 +73,16 @@ const withState = function (...args) {
 
     } else {
 
-        const [ readablePropNames, writeablePropNames, actions ] = parseProps(args);
+        const [ selectStateProps, bindActionProps ] = parseProps(args);
 
         return function (Component) {
 
             const ComponentWithState = function (props) {
 
-                const conflictingNames = readablePropNames.filter(name => props.hasOwnProperty(name)).concat(writeablePropNames.filter(name => props.hasOwnProperty('set' + pascalCase(name))));
-
-                if (conflictingNames.length > 0) {
-                    throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
-                }
-
                 const explicitlyBoundComponent = function ({store}) {
 
-                    const readableProps = fromEntries(readablePropNames.map((propName) => [propName, store[propName]]));
-
-                    const writeableProps = fromEntries(writeablePropNames.map((propName) => [ 'set' + pascalCase(propName), (value) => {
-                        if (typeof value === 'function') {
-                            store[propName] = value(store[propName]);
-                        } else {
-                            store[propName] = value;
-                        }
-                    } ] ));
-
-                    const actionProps = actions(store, props);
+                    const stateProps = selectStateProps(store, props);
+                    const actionProps = bindActionProps(store, props);
 
                     const conflictingNames = Object.keys(actionProps || {}).filter(name => props.hasOwnProperty(name));
 
@@ -106,7 +91,7 @@ const withState = function (...args) {
                     }
 
                     return (
-                        <Component {...props} {...readableProps} {...writeableProps} {...actionProps} store={store} dispatch={store.dispatch} />
+                        <Component {...props} {...stateProps} {...actionProps} store={store} dispatch={store.dispatch} />
                     );
 
                 }

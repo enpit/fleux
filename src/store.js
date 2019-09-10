@@ -156,7 +156,7 @@ const createStore = function (initialValues = {}) {
     const handler = (function () {
         return {
             set: function (target, prop, value) {
-
+                console.log('GOTTEM!')
                 target[prop] = value;
 
                 if (typeof props[prop] === 'undefined') {

@@ -1,0 +1,29 @@
+{
+  "name": "counter",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "parcel index.html",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@babel/core": "^7.4.4",
+    "@babel/plugin-proposal-class-properties": "^7.4.4",
+    "parcel-bundler": "^1.12.3"
+  },
+  "babel": {
+    "presets": [
+        ["@babel/preset-env", { "modules": false }],
+        "@babel/preset-react"
+    ],
+    "plugins": [
+        ["@babel/plugin-proposal-decorators", {"legacy": true}],
+        ["@babel/plugin-proposal-class-properties", {"loose":true}],
+        "@babel/plugin-transform-react-jsx-source"
+    ]
+}
+}
