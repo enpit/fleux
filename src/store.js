@@ -1,4 +1,5 @@
 import * as SYMBOLS from './symbols';
+import preventWrites from './preventWrites';
 
 const createStore = function (initialValues = {}) {
 
@@ -64,7 +65,8 @@ const createStore = function (initialValues = {}) {
             throw new TypeError("Unable to dispatch action of type " + typeof action + ". Action must be a function or an action name string.")
         }
 
-        const diff = _action(store, ...args);
+        const immutableStore = preventWrites(store, 'Refusing to write to store while dispatching.');
+        const diff = _action(immutableStore, ...args);
 
         if (typeof diff !== 'object') {
             throw new TypeError("Unable to merge action return value of type " + typeof diff + " into the store. Return value should be a store slice object. (Did you accidentally dispatch a function that already dispatches internally?)");
