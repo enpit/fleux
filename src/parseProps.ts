@@ -30,7 +30,7 @@ export default function parseProps (args: any[]): Array<Array<Object> | Object> 
 
             // todo: add setters
 
-            return fromEntries(statePropNames.map(([storeName, propName]) => [propName, store[storeName]]));
+            return fromEntries(statePropNames.map(([propName, storeName]) => [propName, store[storeName]]));
 
         }
     }
