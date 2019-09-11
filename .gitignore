@@ -90,3 +90,6 @@ typings/
 # Lockfiles
 package-lock.json
 yarn.lock
+
+# Editor Config
+.vscode
