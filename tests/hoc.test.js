@@ -19,58 +19,6 @@ afterEach(() => {
     global.console.error.mockRestore()
 });
 
-describe('connect', function () {
-    it('should accept a component and an object', function () {
-
-        const App = function () {
-            return (
-                <div>Foo</div>
-            )
-        }
-
-        expect(() => {
-            const AppWithState = connect(App, {});
-        }).not.toThrow();
-
-    });
-
-    it('should return a component that can be rendered as usual', function () {
-        const App = function () {
-            return (
-                <div>Foo</div>
-            )
-        }
-
-        const AppWithState = connect(App, {});
-        const wrapper = render(<AppWithState />);
-        expect(wrapper.text()).toBe('Foo');
-    });
-
-    it('should return a component that passes through props to the original component', function () {
-        const App = function ({foo}) {
-            return (
-                <div>{foo}</div>
-            )
-        }
-
-        const AppWithState = connect(App, {});
-        const wrapper = render(<AppWithState foo="bar" />);
-        expect(wrapper.text()).toBe('bar');
-    });
-
-    it('should throw when being called without a store object', function () {
-        const App = function ({foo}) {
-            return (
-                <div>{foo}</div>
-            )
-        }
-
-        expect(() => {
-            const AppWithState = connect(App);
-        }).toThrow();
-    });
-});
-
 describe('withState', function () {
     it('returns a component that wraps its input component and renders it', function () {
         const Foo = function () {
@@ -80,6 +28,26 @@ describe('withState', function () {
         }
 
         const FooWithState = withState('nothing')(Foo);
+
+        const App = function () {
+            return (
+                <FooWithState />
+            )
+        }
+
+        const AppWithState = connect(App, {});
+        const wrapper = render(<AppWithState />);
+        expect(wrapper.text()).toBe('Foo');
+    });
+
+    it('returns a component that wraps its input component and renders it', function () {
+        const Foo = function () {
+            return (
+                <div>Foo</div>
+            )
+        }
+
+        const FooWithState = withState()(Foo);
 
         const App = function () {
             return (
@@ -156,42 +124,16 @@ describe('withState', function () {
         const AppWithState = connect(App, {foo:'bar',answer:42});
         const wrapper = mount(<AppWithState />);
         expect(wrapper.find(Foo).props().foo).toBeDefined()
-        expect(wrapper.find(Foo).props().setFoo).not.toBeDefined();
         expect(wrapper.find(Foo).props().answer).toBeDefined()
-        expect(wrapper.find(Foo).props().setAnswer).not.toBeDefined();
         wrapper.unmount();
     });
 
-    it('takes `null` and an array argument that is interpreted as a list of writeable store keys and correspondingly injected into the component', function () {
-        const Foo = function ({foo, setFoo, answer, setAnswer}) {
-            return (
-                <div>Foo</div>
-            )
-        }
-
-        const FooWithState = withState(null, ['foo', 'answer'])(Foo);
-
-        const App = function () {
-            return (
-                <FooWithState />
-            )
-        }
-
-        const AppWithState = connect(App, {foo:'bar',answer:42});
-        const wrapper = mount(<AppWithState />);
-        expect(wrapper.find(Foo).props().foo).not.toBeDefined()
-        expect(wrapper.find(Foo).props().setFoo).toBeDefined();
-        expect(wrapper.find(Foo).props().answer).not.toBeDefined()
-        expect(wrapper.find(Foo).props().setAnswer).toBeDefined();
-        wrapper.unmount();
-    });
-
-    it('takes three array arguments where the third is interpreted as a list of action names that are injected into the component', function () {
+    it('takes two array arguments where the second is interpreted as a list of action names that are injected into the component', function () {
 
         const store = createStore({counter:0});
         store.createAction('increment', ({counter}, inc) => ({counter:counter+inc}));
         const Foo = (({increment}) => (<button onClick={() => increment(5)}></button>));
-        const FooWithState = withState([], [], ['increment'])(Foo);
+        const FooWithState = withState([], ['increment'])(Foo);
 
         const App = () => (<FooWithState />);
         const AppWithState = connect(App, store);
@@ -204,12 +146,12 @@ describe('withState', function () {
 
     });
 
-    it('takes two arrays and an object as arguments where the third argument is interpreted as a set of action name, action function pairs that are injected into the component', function () {
+    it('takes an array and an object as arguments where the second argument is interpreted as a set of action name, action function pairs that are injected into the component', function () {
 
         const store = createStore({counter:0});
         const increment = store.createAction(({counter},inc) => ({counter:counter+inc}));
         const Foo = (({increment}) => (<button onClick={() => increment(6)}></button>));
-        const FooWithState = withState([], [], {increment})(Foo);
+        const FooWithState = withState([], {increment})(Foo);
 
         const App = () => (<FooWithState />);
         const AppWithState = connect(App, store);
@@ -222,12 +164,12 @@ describe('withState', function () {
 
     });
 
-    it('takes two arrays and an object as arguments where the third argument is interpreted as a set of action name, function pairs that are injected into the component', function () {
+    it('takes an array and an object as arguments where the second argument is interpreted as a set of action name, function pairs that are injected into the component', function () {
 
         const store = createStore({counter:0});
         const increment = ({counter},inc) => ({counter:counter+inc});
         const Foo = (({increment}) => (<button onClick={() => increment(7)}></button>));
-        const FooWithState = withState([], [], {increment})(Foo);
+        const FooWithState = withState([], {increment})(Foo);
 
         const App = () => (<FooWithState />);
         const AppWithState = connect(App, store);
@@ -240,11 +182,11 @@ describe('withState', function () {
 
     });
 
-    it('takes two arrays and a function as arguments where the third argument is interpreted as a function that maps \`dispatch\` to an object of prop name, function pairs that are injected into the component', function () {
+    it('takes an array and a function as arguments where the second argument is interpreted as a function that maps \`dispatch\` to an object of prop name, function pairs that are injected into the component', function () {
 
         const store = createStore({counter:0});
         const Foo = (({increment}) => (<button onClick={() => increment(8)}></button>));
-        const FooWithState = withState([], [], (dispatch) => ({increment:(inc) => dispatch(({counter},inc) => ({counter:counter+inc}),inc)}))(Foo);
+        const FooWithState = withState([], (dispatch) => ({increment:(inc) => dispatch(({counter},inc) => ({counter:counter+inc}),inc)}))(Foo);
 
         const App = () => (<FooWithState />);
         const AppWithState = connect(App, store);
@@ -257,16 +199,21 @@ describe('withState', function () {
 
     });
 
-    it('throws when supplied with a mix of array and string arguments', function () {
-        const Foo = function ({foo, setFoo, answer, setAnswer}) {
-            return (
-                <div>Foo</div>
-            )
-        }
+    it('take a list of strings and an array as arguments where the second is interpreted as a list of action names that are injected into the component', function () {
 
-        expect(() => {
-            withState('null', ['foo', 'answer'])(Foo)
-        }).toThrow();
+        const store = createStore({counter:0});
+        store.createAction('increment', ({counter}, inc) => ({counter:counter+inc}));
+        const Foo = (({increment}) => (<button onClick={() => increment(5)}></button>));
+        const FooWithState = withState('null', ['increment'])(Foo);
+
+        const App = () => (<FooWithState />);
+        const AppWithState = connect(App, store);
+        const wrapper = mount(<AppWithState />);
+        expect(wrapper.find(Foo).props().increment).toBeDefined();
+        expect(wrapper.find(Foo).props().increment).toBeFunction();
+        wrapper.find('button').props().onClick();
+        expect(store.counter).toBe(5);
+        wrapper.unmount();
 
     });
 
@@ -466,7 +413,7 @@ describe('withState', function () {
         const AppWithState = connect(App, store);
 
         const wrapper = mount(<AppWithState />);
-        wrapper.find(Foo).props().setFoo('bazzz');
+        wrapper.find(Foo).props().setFoo(foo => ('bazzz'));
         expect(wrapper.find(Bar).props().store).toBeDefined();
         expect(wrapper.find(Bar).text()).toBe('bazzz');
         wrapper.unmount();
@@ -546,7 +493,7 @@ describe('withState', function () {
         }
 
         const wrapper = mount(<App />);
-        wrapper.find(FooSetter).props().setFoo('bang');
+        wrapper.find(FooSetter).props().setFoo(foo => 'bang');
         expect(wrapper.find(Foo).text()).toBe('bang');
         wrapper.unmount();
     });
@@ -618,7 +565,7 @@ describe('global state', function () {
         expect(setFooProp).toBeDefined();
         expect(setFooProp).toBeFunction();
 
-        setFooProp('bazzz');
+        setFooProp(foo => 'bazzz');
         expect(wrapper.find(Foo).text()).toBe('bazzz');
         wrapper.unmount();
     });
@@ -664,7 +611,7 @@ describe('global state', function () {
             const wrapper = mount(<AppWithState />);
         }).toThrow();
 
-        const FooWithStateTheSecond = withState(['foo'], ['bar'])(Foo);
+        const FooWithStateTheSecond = withState(['foo'])(Foo);
 
         const AppTheSecond = function () {
             return (
@@ -677,11 +624,11 @@ describe('global state', function () {
             const wrapper = mount(<AppWithStateTheSecond />);
         }).toThrow();
 
-        const FooWithStateTheThird = withState(['foo'], ['bar'])(Foo);
+        const FooWithStateTheThird = withState(['foo'])(Foo);
 
         const AppTheThird = function () {
             return (
-                <FooWithStateTheThird setBar={'bar'} />
+                <FooWithStateTheThird setFoo={'bar'} />
             )
         }
         const AppWithStateTheThird = connect(AppTheThird, {foo: 'bar'});
