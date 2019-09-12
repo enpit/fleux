@@ -4,17 +4,20 @@ import fromEntries from 'fromentries';
 
 import * as SYMBOLS from './symbols';
 
-export default function parseProps (args: any[]): Array<Array<Object> | Object> {
+export declare type SelectState = (store, ownProps: Object) => ({});
+export declare type BindActions = (store, ownProps: Object) => ({});
 
-    var selectStateProps = (store, ownProps) => ({}), bindActionProps = (store, ownProps) => {}, statePropNames: Array<[string, string]> = [];
+export default function parseProps (args: any[]): Array<SelectState | BindActions> {
+
+    var selectStateProps: SelectState = (store, ownProps) => ({}), bindActionProps: BindActions = (store, ownProps) => ({}), statePropNames: Array<[string, string]> = [];
 
     if (typeof args[0] === 'function') {
         selectStateProps = args[0];
     } else if (typeOf(args[0]) !== 'null') {
         if (args.every((propName) => typeof propName === 'string')) {
-            statePropNames = args.map(name => [name,name]);
+            statePropNames = args.map((name: string) => [name,name]);
         } else if (Array.isArray(args[0]) && args[0].every((propName) => typeof propName === 'string')) {
-            statePropNames = args[0].map(name => [name,name]);
+            statePropNames = args[0].map((name: string) => [name,name]);
         } else if (typeof args[0] === 'object') {
             statePropNames = Object.entries(args[0]);
         }
@@ -38,7 +41,7 @@ export default function parseProps (args: any[]): Array<Array<Object> | Object> 
     }
 
     if (Array.isArray(args[1]) && args[1].every(action => typeof action === 'string')) {
-        bindActionProps = store => fromEntries(args[1].map(actionName => [actionName, (...args) => store.dispatch(actionName, ...args)]));
+        bindActionProps = store => fromEntries(args[1].map((actionName: string) => [actionName, (...args) => store.dispatch(actionName, ...args)]));
     } else if (typeof args[1] === 'function') {
         bindActionProps = (store, ownProps) => args[1](store.dispatch, ownProps);
     } else if (typeof args[1] === 'object') {
@@ -50,10 +53,6 @@ export default function parseProps (args: any[]): Array<Array<Object> | Object> 
             }
         }));
     }
-
-    // } else {
-    //     throw Error(`Failed to parse arguments supplied to \`withState\`. Rejected invocation of \`withState\` with arguments of the types ${args.map(propName => typeOf(propName))}`);
-    // }
 
     return [selectStateProps, bindActionProps];
 
