@@ -1,7 +1,5 @@
 import * as React from 'react';
-import pascalCase from 'just-pascal-case';
-import typeOf from 'just-typeof';
-import fromEntries from 'fromentries';
+import compare from 'just-compare';
 
 import { createStore } from './store';
 import context from './context';
@@ -27,19 +25,31 @@ const withContext = function (Component) {
     return ContextWrapper;
 }
 
-const statefulComponentFactory = function (Component) {
+const statefulComponentFactory = function (Component, selectStateProps, bindActionProps) {
 
-    var currentlyRenderingComponent = undefined;
-
-    const handler = {
-        get: function (target, prop) {
-            return target[SYMBOLS.STORE_GET](prop, currentlyRenderingComponent);
-        }
-    }
+    var currentlyRenderingComponent = undefined, stateProps;
 
     const ComponentWithState = withContext(function ComponentWithContext ({context, ...props}) {
 
-        const localProxy = new Proxy(context, handler);
+        const localProxy = new Proxy(context, {
+            get: function (target, prop) {
+                return target[SYMBOLS.STORE_GET](prop, callback);
+            }
+        });
+
+        const callback = function (prop, value) {
+            const updatedStore = {...localProxy, createAction: localProxy.createAction, [prop]: value};
+            const immutableStore = preventWrites(updatedStore, 'Refusing to write to store inside of mapStateToProps.');
+            const updatedProps = selectStateProps(immutableStore, props);
+            if (!compare(stateProps, updatedProps)) {
+                stateProps = updatedProps;
+                currentlyRenderingComponent.setState({[prop]:value});
+            }
+        };
+
+        const immutableStore = preventWrites(localProxy, 'Refusing to write to store inside of mapStateToProps or mapDispatchToProps.');
+        stateProps = selectStateProps(immutableStore, props);
+        const actionProps = bindActionProps(immutableStore, props);
 
         class ComponentWithStore extends React.Component {
             constructor(props) {
@@ -49,7 +59,7 @@ const statefulComponentFactory = function (Component) {
             }
             render() {
                 return (
-                    <Component store={localProxy} {...this.props} />
+                    <Component store={localProxy} {...stateProps} {...actionProps} {...this.props} />
                 );
             }
         }
@@ -78,31 +88,18 @@ const withState = function (...args) {
 
         return function (Component) {
 
-            const ComponentWithState = function (props) {
+            const ComponentWithState = function (ownProps) {
 
-                const explicitlyBoundComponent = function ({store}) {
-
-                    const immutableStore = preventWrites(store, 'Refusing to write to store inside of mapStateToProps or mapDispatchToProps.');
-
-                    const stateProps = selectStateProps(immutableStore, props);
-                    const actionProps = bindActionProps(immutableStore, props);
-
-                    const conflictingNames = Object.keys(actionProps || {}).filter(name => props.hasOwnProperty(name));
-
-                    if (conflictingNames.length > 0) {
-                        throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
-                    }
-
+                const explicitlyBoundComponent = function ({store, ...props}) {
                     return (
-                        <Component {...props} {...stateProps} {...actionProps} store={store} dispatch={store.dispatch} />
+                        <Component {...props} store={store} dispatch={store.dispatch} />
                     );
-
                 }
 
-                const StatefulComponent = statefulComponentFactory(explicitlyBoundComponent);
+                const StatefulComponent = statefulComponentFactory(explicitlyBoundComponent, selectStateProps, bindActionProps);
 
                 return (
-                    <StatefulComponent {...props} />
+                    <StatefulComponent {...ownProps} />
                 );
 
             };
