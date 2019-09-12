@@ -31,7 +31,13 @@ export default function parseProps (args: any[]): Array<SelectState | BindAction
             }
 
             const getters = statePropNames.map(([propName, storeName]) => [propName, store[storeName]]);
-            const setters = statePropNames.map(([propName, storeName]) => ['set' + pascalCase(propName), store.createAction((store, setter, ...args) => ({[storeName]: setter(store[storeName], ...args)}))]);
+            const setters = statePropNames.map(([propName, storeName]) => ['set' + pascalCase(propName), store.createAction((store, setter, ...args) => {
+                if (typeof setter !== 'function') {
+                    throw new TypeError('Failed to set store property. Supplied setter is not a function.');
+                }
+
+                return ({[storeName]: setter(store[storeName], ...args)});
+            })]);
 
             return fromEntries(getters.concat(setters));
 
