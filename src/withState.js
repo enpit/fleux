@@ -75,7 +75,7 @@ const statefulComponentFactory = function (Component, selectStateProps, bindActi
             }
             render() {
                 return (
-                    <Component store={localProxy} {...stateProps} {...actionProps} {...this.props} />
+                    <Component store={localProxy} dispatch={localProxy.dispatch} {...stateProps} {...actionProps} {...this.props} />
                 );
             }
         }
@@ -108,7 +108,7 @@ const withState = function (...args) {
 
                 const explicitlyBoundComponent = function ({store, ...props}) {
                     return (
-                        <Component {...props} store={store} dispatch={store.dispatch} />
+                        <Component {...props} store={store} />
                     );
                 }
 
