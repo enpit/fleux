@@ -27,7 +27,9 @@ const withContext = function (Component) {
 
 const statefulComponentFactory = function (Component, selectStateProps, bindActionProps) {
 
-    var currentlyRenderingComponent = undefined, stateProps;
+    var currentlyRenderingComponent = undefined,
+        actionProps,
+        stateProps;
 
     const ComponentWithState = withContext(function ComponentWithContext ({context, ...props}) {
 
@@ -37,19 +39,33 @@ const statefulComponentFactory = function (Component, selectStateProps, bindActi
             }
         });
 
-        const callback = function (prop, value) {
-            const updatedStore = {...localProxy, createAction: localProxy.createAction, [prop]: value};
-            const immutableStore = preventWrites(updatedStore, 'Refusing to write to store inside of mapStateToProps.');
-            const updatedProps = selectStateProps(immutableStore, props);
-            if (!compare(stateProps, updatedProps)) {
-                stateProps = updatedProps;
-                currentlyRenderingComponent.setState({[prop]:value});
+        const callback = (function () {
+            if (typeof selectStateProps === 'function') {
+                return function (prop, value) {
+                    const updatedStore = {...localProxy, createAction: localProxy.createAction, [prop]: value};
+                    const immutableStore = preventWrites(updatedStore, 'Refusing to write to store inside of mapStateToProps.');
+                    const updatedProps = selectStateProps(immutableStore, props);
+                    if (!compare(stateProps, updatedProps)) {
+                        stateProps = updatedProps;
+                        currentlyRenderingComponent.setState({[prop]:value});
+                    }
+                };
+            } else {
+                return function (prop, value) {
+                    currentlyRenderingComponent.setState({[prop]:value});
+                }
             }
-        };
+        }());
 
         const immutableStore = preventWrites(localProxy, 'Refusing to write to store inside of mapStateToProps or mapDispatchToProps.');
-        stateProps = selectStateProps(immutableStore, props);
-        const actionProps = bindActionProps(immutableStore, props);
+
+        if (typeof selectStateProps === 'function') {
+            stateProps = selectStateProps(immutableStore, props);
+        }
+
+        if (typeof bindActionProps === 'function') {
+            actionProps = bindActionProps(immutableStore, props);
+        }
 
         class ComponentWithStore extends React.Component {
             constructor(props) {

@@ -13,7 +13,7 @@ export default function parseProps (args: any[]): Array<SelectState | BindAction
 
     if (typeof args[0] === 'function') {
         selectStateProps = args[0];
-    } else if (typeOf(args[0]) !== 'null') {
+    } else if (typeOf(args[0]) !== 'null' && typeof args[0] !== 'undefined') {
         if (args.every((propName) => typeof propName === 'string')) {
             statePropNames = args.map((name: string) => [name,name]);
         } else if (Array.isArray(args[0]) && args[0].every((propName) => typeof propName === 'string')) {
