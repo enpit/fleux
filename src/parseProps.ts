@@ -10,8 +10,7 @@ export default function parseProps (args: any[]): Array<Array<Object> | Object> 
 
     if (typeof args[0] === 'function') {
         selectStateProps = args[0];
-    } else {
-
+    } else if (typeOf(args[0]) !== 'null') {
         if (args.every((propName) => typeof propName === 'string')) {
             statePropNames = args.map(name => [name,name]);
         } else if (Array.isArray(args[0]) && args[0].every((propName) => typeof propName === 'string')) {
@@ -34,6 +33,8 @@ export default function parseProps (args: any[]): Array<Array<Object> | Object> 
             return fromEntries(getters.concat(setters));
 
         }
+    } else {
+        ;
     }
 
     if (Array.isArray(args[1]) && args[1].every(action => typeof action === 'string')) {
