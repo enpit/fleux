@@ -28,9 +28,10 @@ export default function parseProps (args: any[]): Array<Array<Object> | Object> 
                 throw Error(`Refusing to overwrite store props with parent-injected prop. The name(s) ${conflictingNames} exist in the store and are passed down from the parent component, resulting in a naming conflict.`);
             }
 
-            // todo: add setters
+            const getters = statePropNames.map(([propName, storeName]) => [propName, store[storeName]]);
+            const setters = statePropNames.map(([propName, storeName]) => ['set' + pascalCase(propName), store.createAction((store, setter, ...args) => ({[storeName]: setter(store[storeName], ...args)}))]);
 
-            return fromEntries(statePropNames.map(([propName, storeName]) => [propName, store[storeName]]));
+            return fromEntries(getters.concat(setters));
 
         }
     }
