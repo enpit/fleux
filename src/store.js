@@ -130,20 +130,20 @@ const createStore = function (initialValues = {}) {
         },
         [SYMBOLS.STORE_GET]: {
             enumerable: false,
-            value: function (prop, currentlyRenderingComponent) {
+            value: function (prop, callback) {
 
-                if (typeof currentlyRenderingComponent !== 'undefined') {
+                if (typeof callback !== 'undefined') {
 
                     if (typeof props[prop] === 'undefined') {
-                        props[prop] = [currentlyRenderingComponent];
+                        props[prop] = [callback];
                     }
 
                     if (!props.hasOwnProperty(prop)) {
                         return this[prop];
                     }
 
-                    if (props[prop].indexOf(currentlyRenderingComponent) === -1) {
-                        props[prop].push(currentlyRenderingComponent);
+                    if (props[prop].indexOf(callback) === -1) {
+                        props[prop].push(callback);
                     }
 
                 }
@@ -165,8 +165,8 @@ const createStore = function (initialValues = {}) {
                     return true;
                 }
 
-                for (let component of props[prop]) {
-                    component.setState({[prop]:value})
+                for (let callback of props[prop]) {
+                    callback(prop, value);
                 }
 
                 return true;
