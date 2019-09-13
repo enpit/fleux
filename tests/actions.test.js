@@ -316,5 +316,17 @@ describe('actions', function () {
                 wrapper.unmount();
             });
         });
+
+        it('should throw when the store is mutated inside of it', function () {
+            const store = createStore({
+                foo: 'bar'
+            });
+
+            expect(() => {
+                store.dispatch(store => {
+                    store.foo = 'bazz';
+                });
+            }).toThrow();
+        });
     });
 });
