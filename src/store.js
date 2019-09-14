@@ -53,6 +53,10 @@ const createStore = function (initialValues = {}) {
         });
     };
 
+    const setValue = function (prop, setter, ...args) {
+        return this[prop] = setter(this[prop], ...args);
+    };
+
     const dispatch = function (action, ...args) {
         var _action;
         if (typeof action === 'string') {
@@ -103,23 +107,27 @@ const createStore = function (initialValues = {}) {
     const props = {};
 
     Object.defineProperties(store, {
-        subscribe: {
+        'subscribe': {
             enumerable: false,
             value: subscribe
         },
-        unsubscribe: {
+        'unsubscribe': {
             enumerable: false,
             value: unsubscribe
         },
-        create: {
+        'create': {
             enumerable: false,
             value: create
         },
-        dispatch: {
+        'set': {
+            enumerable: false,
+            value: setValue
+        },
+        'dispatch': {
             enumerable: false,
             value: dispatch
         },
-        createAction: {
+        'createAction': {
             enumerable: false,
             value: createAction
         },

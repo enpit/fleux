@@ -38,6 +38,11 @@ describe('store', function () {
             expect(store).toHaveProperty('dispatch');
         });
 
+        it('should have a "set" property', function () {
+            const store = createStore();
+            expect(store).toHaveProperty('set');
+        });
+
         it('should not have any enumerable properties', function () {
             const store = createStore();
             expect(Object.keys(store).length).toBe(0);
@@ -126,6 +131,7 @@ describe('store', function () {
             }).toThrow();
         })
     });
+
     describe('dispatch', function () {
         it('should take a function, invoke it and merge the result with the store', function () {
             const store = createStore();
@@ -179,6 +185,27 @@ describe('store', function () {
             expect(store.foo).toBe('bar');
         });
     });
+
+    describe('set', function () {
+        it('should take a key name and a function, execute it and assign the result to the store key', function () {
+            const store = createStore({});
+            store.set('foo', () => 'bar');
+            expect(store.foo).toBe('bar');
+        });
+
+        it('should call the setter function with the key\'s current value', function () {
+            const store = createStore({foo:42});
+            store.set('foo', (foo) => foo+1);
+            expect(store.foo).toBe(43);
+        });
+
+        it('should call the setter function with the key\'s current value and pass on additional arguments', function () {
+            const store = createStore({foo:42});
+            store.set('foo', (foo, inc) => foo+inc, 5);
+            expect(store.foo).toBe(47);
+        });
+    });
+
 });
 
 describe('subscriptions', function () {
