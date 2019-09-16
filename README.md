@@ -142,6 +142,18 @@ store.dispatch('increment');
 store.counter // 2
 ```
 
+### `prepareWriteActions`
+
+If you want to write keys depending on their current value but don't want to use actions, you can use a little helper function that injects write actions into your component as props:
+
+```js
+import { prepareWriteActions, withState } from 'fleux';
+
+withState(null, prepareWriteActins('foo'))(({setFoo}) => {
+    setFoo(foo => foo+42); // Pass a mutator that takes the current value and returns the new value
+})
+```
+
 ### Bind Action Props
 
 In case you want **fleux** to inject actions into your component's props, you can do that too. The second argument to `withState` can be used to provide actions to your component as props. You can provide an array which will be interpreted as a list of action names, or an object which will be interpreted as a mapping of action prop names to actions. You can also pass in a function which will be called with `dispatch` and is expected to return an object mapping action prop names to functions that call `dispatch`.
@@ -181,3 +193,11 @@ store.foo = 'bar'; // logs 'bar'
 ```
 
 This direct store access allows you to connect the state store used in your React components to other parts of your application.
+
+If you want to mutate store values inside your components without receiving any updates for a value but don't want to use actions, you can instead use the store's `set` method: It takes the name of a store key and a function that will be called with the key's current value and its return value is written to that key.
+
+```js
+// store.set(key, currentValue => newValue)
+store.set('counter', counter => counter+1)
+store.set('counter', (counter, increment) => counter+increment, 5) // additional arguments are passed on
+```
