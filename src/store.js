@@ -158,6 +158,12 @@ const createStore = function (initialValues = {}) {
 
                 return this[prop];
             }
+        },
+        [SYMBOLS.STORE_GETACTIONS]: {
+            enumerable: false,
+            value: function () {
+                return namedActions;
+            }
         }
     });
 
