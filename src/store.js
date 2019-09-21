@@ -5,6 +5,8 @@ const createStore = function (initialValues = {}) {
 
     const values = {};
     const callbacks = {};
+    const namedProtoActions = {};
+    const unnamedProtoActions = [];
     const namedActions = {};
     const unnamedActions = [];
     const store = {};
@@ -60,7 +62,7 @@ const createStore = function (initialValues = {}) {
     const dispatch = function (action, ...args) {
         var _action;
         if (typeof action === 'string') {
-            _action = namedActions[action];
+            _action = namedProtoActions[action];
         } else if (action[SYMBOLS.ACTION_MARKER]) {
             return action(...args);
         } else if (typeof action === 'function') {
@@ -85,10 +87,10 @@ const createStore = function (initialValues = {}) {
         if (typeof args[0] === 'string') {
             name = args[0];
             proto = args[1];
-            namedActions[name] = proto;
+            namedProtoActions[name] = proto;
         } else {
             proto = args[0];
-            unnamedActions.push(proto);
+            unnamedProtoActions.push(proto);
         }
 
         action = function (...args) {
@@ -100,6 +102,12 @@ const createStore = function (initialValues = {}) {
             writable: false,
             value: true
         });
+
+        if (typeof args[0] === 'string') {
+            namedActions[name] = action;
+        } else {
+            unnamedActions.push(action);
+        }
 
         return action;
     };
