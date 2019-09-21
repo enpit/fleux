@@ -1,13 +1,11 @@
 import * as React from 'react';
 import compare from 'just-compare';
 
-import { createStore } from './store';
 import context from './context';
 import * as SYMBOLS from './symbols';
+import defaultStore from './defaultStore';
 import preventWrites from './preventWrites';
 import parseProps from './parseProps';
-
-const defaultStore = createStore();
 
 const withContext = function (Component) {
 
