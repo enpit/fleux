@@ -1,7 +1,7 @@
 import * as SYMBOLS from './symbols';
 
-export const getNamedAction = function (store) {
+export const getNamedActions = function (store) {
     return store[SYMBOLS.STORE_GETACTIONS]();
 }
 
-export default getNamedAction;
+export default getNamedActions;
