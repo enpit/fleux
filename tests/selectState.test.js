@@ -182,10 +182,10 @@ describe('`selectStateProps`', function () {
                 foo: 'bar'
             });
 
-            var tmp = 0;
+            var counter = 0;
 
             const Foo = withState(() => {
-                tmp++;
+                counter++;
                 return ({_foo: 'notchanging'});
             })(({_foo}) => (<div>{_foo}</div>));
 
@@ -194,7 +194,7 @@ describe('`selectStateProps`', function () {
             const wrapper = mount(<AppWithState />);
             store.foo = 'bazzz';
             expect(wrapper.find(Foo).text()).toBe('notchanging');
-            expect(tmp).toBe(1);
+            expect(counter).toBe(1);
             wrapper.unmount();
         });
 
@@ -203,16 +203,46 @@ describe('`selectStateProps`', function () {
                 foo: 'bar'
             });
 
+            var counter = 0;
+
             const Foo = withState(({foo}) => {
                 const tmp = foo;
                 return ({_foo: 'notchanging'});
-            })(({_foo}) => (<div>{_foo}</div>));
+            })(({_foo}) => {
+                counter++;
+                return (<div>{_foo}</div>);
+            });
 
             const App = () => (<Foo />);
             const AppWithState = connect(App, store);
             const wrapper = mount(<AppWithState />);
             store.foo = 'bazzz';
             expect(wrapper.find(Foo).text()).toBe('notchanging');
+            expect(counter).toBe(1);
+            wrapper.unmount();
+        });
+
+        it('does not rerender the component for changes to a key that do not result in changes to a prop', function () {
+            const store = createStore({
+                foo: 'bar',
+                answer: 42
+            });
+            var counter = 0;
+
+            const Foo = withState(({foo, answer}) => {
+                const tmp = answer;
+                return ({foo});
+            })(({foo}) => {
+                counter++;
+                return (<div>{foo}</div>);
+            });
+
+            const App = () => (<Foo />);
+            const AppWithState = connect(App, store);
+            const wrapper = mount(<AppWithState />);
+            store.answer = 43;
+            expect(wrapper.find(Foo).text()).toBe('bar');
+            expect(counter).toBe(1);
             wrapper.unmount();
         });
 

@@ -44,6 +44,7 @@ const createStore = function (initialValues = {}) {
 
         callbacks[name] = [];
         Object.defineProperty(store, name, {
+            enumerable: true,
             get () {
                 return values[name];
             },
