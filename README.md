@@ -201,3 +201,57 @@ If you want to mutate store values inside your components without receiving any 
 store.set('counter', counter => counter+1)
 store.set('counter', (counter, increment) => counter+increment, 5) // additional arguments are passed on
 ```
+
+## Hooks
+
+As an alternative to using the `withState` higher-order component you can use hooks to interact with stores.
+
+### Accessing Store State
+
+You can access the store from inside your component using the `useStore` hook:
+
+```js
+const Foo = function () {
+    const { text } = useStore();
+    return (
+        <div>{text}</div>
+    )
+}
+```
+
+If you want to pass in a `selectStateProps` function, use the `useSelector` hook:
+
+```js
+const Foo = function () {
+    const { numberOfTodos } = useSelector(({todos}) => ({numberOfTodos: todos.length}));
+    return (
+        <div># of Todos: {numberOfTodos}</div>
+    )
+}
+```
+
+### Accessing Actions
+
+You can get access to the store's `dispatch` function using `useDispatch`:
+
+```js
+const Foo = function () {
+    const dispatch = useDispatch();
+    return (
+        <button onClick={() => dispatch(({counter}) => ({counter:counter+1}))}>Increment</button>
+    )
+}
+```
+
+Or, you can directly access named actions from a store by calling `useActions`:
+
+```js
+createAction('increment', ({counter}) => ({counter:counter+1}));
+
+const Foo = function () {
+    const { increment } = useActions();
+    return (
+        <button onClick={() => increment()}>Increment</button>
+    )
+}
+```
