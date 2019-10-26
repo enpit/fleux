@@ -30,33 +30,33 @@
     "just-typeof": "^2.0.0"
   },
   "peerDependencies": {
-    "react": "^16.3.0"
+    "react": "^16.11.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.6.0",
-    "@babel/core": "^7.6.0",
+    "@babel/cli": "^7.6.4",
+    "@babel/core": "^7.6.4",
     "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/plugin-proposal-decorators": "^7.6.0",
     "@babel/plugin-transform-react-jsx-source": "^7.5.0",
-    "@babel/preset-env": "^7.6.0",
-    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-env": "^7.6.3",
+    "@babel/preset-react": "^7.6.3",
     "babel-jest": "^24.9.0",
     "enzyme": "^3.10.0",
-    "enzyme-adapter-react-16": "^1.14.0",
-    "enzyme-to-json": "^3.4.0",
+    "enzyme-adapter-react-16": "^1.15.1",
+    "enzyme-to-json": "^3.4.3",
     "jest": "^24.9.0",
     "jest-extended": "^0.11.2",
-    "jsdom": "^15.1.1",
+    "jsdom": "^15.2.0",
     "react": "^16.9.0",
-    "react-dom": "^16.9.0",
+    "react-dom": "^16.11.0",
     "rimraf": "^3.0.0",
-    "rollup": "^1.21.2",
+    "rollup": "^1.25.2",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-typescript": "^1.0.1",
     "tslib": "^1.10.0",
-    "typescript": "^3.6.3",
+    "typescript": "^3.6.4",
     "yarpm": "^0.2.1"
   }
 }
