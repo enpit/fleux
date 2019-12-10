@@ -48,8 +48,7 @@ export const useSelector = function (selectStateProps) {
         const immutableStore = preventWrites(updatedStore, 'Refusing to write to store inside of mapStateToProps.');
         const updatedProps = selectStateProps(immutableStore);
         if (!compare(stateProps, updatedProps)) {
-            stateProps = updatedProps;
-            localState[1]({[prop]:value});
+            localState[1]({...localProxy,[prop]:value});
         }
     };
 
