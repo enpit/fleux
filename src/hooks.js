@@ -44,12 +44,7 @@ export const useSelector = function (selectStateProps) {
     var stateProps = {};
 
     const callback = function (prop, value) {
-        const updatedStore = {...localProxy, createAction: localProxy.createAction, [prop]: value};
-        const immutableStore = preventWrites(updatedStore, 'Refusing to write to store inside of mapStateToProps.');
-        const updatedProps = selectStateProps(immutableStore);
-        if (!compare(stateProps, updatedProps)) {
-            localState[1]({...localProxy,[prop]:value});
-        }
+        localState[1]({...localProxy,[prop]:value});
     };
 
     const localProxy = new Proxy(store, {
