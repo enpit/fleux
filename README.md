@@ -56,11 +56,14 @@ const App = function () {
     )
 }
 
+// Connect a Component in your hierarchy to the store (optionally passing an initialization object)
+const AppWithState = connect(App, {counter: 0});
+
 // Render your app to the page and enjoy the stateful components in action!
-render(<Root />, document.getElementById('root'));
+render(<AppWithState />, document.getElementById('root'));
 ```
 
-Using `withState` you get reference to a data store injected to your components as a prop. When reading keys from the store object, it automatically subscribes your component to updates of that key.
+Using `withState` your components get a reference to a data store injected as a prop. When reading keys from the store object, it automatically subscribes your component to updates of that key.
 
 ### Selecting State Props
 
