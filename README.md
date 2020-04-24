@@ -118,7 +118,7 @@ Every time a store key that your `selectStateProps` accesses, it will be execute
 
 A different way to manipulate store state without reading keys is by using actions. Actions allow you to describe more complex state transitions in a encapsulated way.
 
-**fleux** stores have a `dispatch` method that allows you to execute actions on the store. Basically, you can pass any function to `dispatch`: The action you pass it will receive the store as an argument and its return value will be merged into the store:
+**fleux** stores have a `dispatch` method that allows you to execute actions on the store. Basically, you can pass any function to `dispatch`: The action you pass, will receive the store as an argument and its return value will be merged into the store:
 
 ```js
 store.counter = 1;
@@ -127,7 +127,22 @@ store.dispatch(increment);
 store.counter // 2
 ```
 
-If you don't want to call dispatch (maybe because you want to pass down the action to a child component that is not connected to a store), you can use a store's `createAction` method. It allows you to bind an action to the store.
+### Passing Arguments
+
+If your action depends on some parameters other than the store, you can simply pass them to `dispatch`.
+
+```js
+store.counter = 1;
+const increment = ({counter}, amount) => ({counter:counter+amount});
+store.dispatch(increment, 5);
+store.counter // 6
+```
+
+Any additional arguments passed to `dispatch` will be passed on the the action.
+
+### Creating Actions
+
+If you don't want to call `dispatch` (maybe because you want to pass down the action to a child component that is not connected to a store), you can use a store's `createAction` method. It allows you to bind an action to the store.
 
 ```js
 store.counter = 1;
@@ -135,6 +150,17 @@ const increment = store.createAction(({counter}) => ({counter:counter+1}));
 increment();
 store.counter // 2
 ```
+
+The bound action created this way also takes any arguments it receives and passes them on to the original action:
+
+```js
+store.counter = 1;
+const increment = store.createAction(({counter}, amount) => ({counter:counter+amount}));
+increment(4);
+store.counter // 5
+```
+
+### Named Actions
 
 You can optionally name actions using `createAction` as well; this way, you technically don't need to bring the actions into scope anymore.
 
