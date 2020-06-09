@@ -1,4 +1,4 @@
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import compare from 'just-compare';
 
 import * as SYMBOLS from './symbols';
@@ -9,6 +9,7 @@ import preventWrites from './preventWrites';
 export const useStore = function () {
     const store = useContext(context);
     var stateProps = {};
+    const subscriptions = [];
 
     const callback = function (prop, value) {
         if (!compare(stateProps[prop], value)) {
@@ -19,7 +20,14 @@ export const useStore = function () {
 
     const localProxy = new Proxy(store, {
         get: function (target, prop) {
+            subscriptions.push([prop, callback]);
             return target[SYMBOLS.STORE_GET](prop, callback);
+        }
+    });
+
+    useEffect(() => () => {
+        for (let subscription of subscriptions) {
+            store[SYMBOLS.STORE_UNGET](subscription[0], subscription[1]);
         }
     });
 
@@ -40,8 +48,8 @@ export const useActions = function () {
 
 export const useSelector = function (selectStateProps) {
     const store = useContext(context);
-
     var stateProps = {};
+    const subscriptions = [];
 
     const callback = function (prop, value) {
         localState[1]({...localProxy,[prop]:value});
@@ -49,7 +57,14 @@ export const useSelector = function (selectStateProps) {
 
     const localProxy = new Proxy(store, {
         get: function (target, prop) {
+            subscriptions.push([prop, callback]);
             return target[SYMBOLS.STORE_GET](prop, callback);
+        }
+    });
+
+    useEffect(() => () => {
+        for (let subscription of subscriptions) {
+            store[SYMBOLS.STORE_UNGET](subscription[0], subscription[1]);
         }
     });
 
