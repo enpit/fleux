@@ -168,6 +168,25 @@ const createStore = function (initialValues = {}) {
                 return this[prop];
             }
         },
+        [SYMBOLS.STORE_UNGET]: {
+            enumerable: false,
+            value: function (prop, callback) {
+
+                if (typeof props[prop] !== 'undefined') {
+
+                    const idx = props[prop].indexOf(callback);
+                    if (idx !== -1) {
+                        props[prop].splice(idx, 1);
+                    }
+
+                    return true;
+
+                } else {
+                    return false;
+                }
+
+            }
+        },
         [SYMBOLS.STORE_GETACTIONS]: {
             enumerable: false,
             value: function () {
