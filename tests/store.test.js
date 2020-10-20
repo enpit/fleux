@@ -184,6 +184,25 @@ describe('store', function () {
             store.dispatch('setFoo', 'bar');
             expect(store.foo).toBe('bar');
         });
+        it('should cause any callbacks added via `subscribe` to be called if the value the observe was changed', function () {
+            const store = createStore({foo:'bar'});
+            var called = false;
+            store.subscribe('foo', function () {
+                called = true;
+            });
+            store.dispatch(() => ({foo: 'baz'}));
+            expect(called).toBe(true);
+        });
+        it('should call selectors that observe two keys only once when both are changed by the same action', function () {
+            const store = createStore({foo:'bar', answer:42, test:false});
+            var called = 0;
+            const initialSelection = store.select(({foo,bar,test}) => {
+                called++;
+                return {foo, bar, test};
+            });
+            store.dispatch(() => ({foo: 'baz', answer: 13, test: true}));
+            expect(called).toBe(2); // This is expected to be 2 and not 1 because `select` always calls the selector immediately to obtain the initial value. The important point here is that `dispatch` only causes one call to the selector.
+        })
     });
 
     describe('set', function () {

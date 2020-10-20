@@ -5,6 +5,7 @@ const createStore = function (initialValues = {}) {
 
     const values = {};
     const callbacks = {};
+    const selectors = {};
     const namedProtoActions = {};
     const unnamedProtoActions = [];
     const namedActions = {};
@@ -29,6 +30,34 @@ const createStore = function (initialValues = {}) {
         }
         callbacks[name].splice(callbacks[name].indexOf(callback), 1);
     };
+
+    const select = function (selector) {
+        const handler = {
+            get: function (target, prop) {
+                if (typeof selector !== 'undefined') {
+
+                    if (typeof selectors[prop] === 'undefined') {
+                        selectors[prop] = [selector];
+                    }
+
+                    if (!selectors.hasOwnProperty(prop)) {
+                        return store[prop];
+                    }
+
+                    if (selectors[prop].indexOf(selector) === -1) {
+                        selectors[prop].push(selector);
+                    }
+
+                }
+
+                return store[prop];
+            }
+        };
+
+        const proxy = new Proxy(store, handler);
+
+        return selector(proxy);
+    }
 
     const create = function (name, initialValue) {
 
@@ -79,7 +108,21 @@ const createStore = function (initialValues = {}) {
             throw new TypeError("Unable to merge action return value of type " + typeof diff + " into the store. Return value should be a store slice object. (Did you accidentally dispatch a function that already dispatches internally?)");
         }
 
-        Object.entries(diff).forEach(([key,value]) => proxy[key] = value);
+        const _callbacks = [];
+
+        Object.entries(diff).forEach(([key,value]) => {
+            store[key] = value;
+            (selectors[key] || []).forEach(selector => {
+                if (_callbacks.indexOf(selector) === -1) {
+                    _callbacks.push(selector);
+                }
+            })
+            // _callbacks.push(...(selectors[key] || []));
+            // _callbacks.push(...(callbacks[key] || []));
+        });
+
+        _callbacks.forEach(callback => callback(proxy));
+
         return true;
     };
 
@@ -113,8 +156,6 @@ const createStore = function (initialValues = {}) {
         return action;
     };
 
-    const props = {};
-
     Object.defineProperties(store, {
         'subscribe': {
             enumerable: false,
@@ -123,6 +164,10 @@ const createStore = function (initialValues = {}) {
         'unsubscribe': {
             enumerable: false,
             value: unsubscribe
+        },
+        'select': {
+            enumerable: false,
+            value: select
         },
         'create': {
             enumerable: false,
@@ -151,16 +196,16 @@ const createStore = function (initialValues = {}) {
 
                 if (typeof callback !== 'undefined') {
 
-                    if (typeof props[prop] === 'undefined') {
-                        props[prop] = [callback];
+                    if (typeof selectors[prop] === 'undefined') {
+                        selectors[prop] = [callback];
                     }
 
-                    if (!props.hasOwnProperty(prop)) {
+                    if (!selectors.hasOwnProperty(prop)) {
                         return this[prop];
                     }
 
-                    if (props[prop].indexOf(callback) === -1) {
-                        props[prop].push(callback);
+                    if (selectors[prop].indexOf(callback) === -1) {
+                        selectors[prop].push(callback);
                     }
 
                 }
@@ -172,11 +217,11 @@ const createStore = function (initialValues = {}) {
             enumerable: false,
             value: function (prop, callback) {
 
-                if (typeof props[prop] !== 'undefined') {
+                if (typeof selectors[prop] !== 'undefined') {
 
-                    const idx = props[prop].indexOf(callback);
+                    const idx = selectors[prop].indexOf(callback);
                     if (idx !== -1) {
-                        props[prop].splice(idx, 1);
+                        selectors[prop].splice(idx, 1);
                     }
 
                     return true;
@@ -203,11 +248,11 @@ const createStore = function (initialValues = {}) {
 
                 target[prop] = value;
 
-                if (typeof props[prop] === 'undefined') {
+                if (typeof selectors[prop] === 'undefined') {
                     return true;
                 }
 
-                for (let callback of props[prop]) {
+                for (let callback of selectors[prop]) {
                     callback(prop, value);
                 }
 
