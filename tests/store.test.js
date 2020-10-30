@@ -105,6 +105,33 @@ describe('store', function () {
         });
     });
 
+    describe('unsubscribe', function () {
+        it('should unsubscribe the given callback from any updates to a store property', function () {
+            const store = createStore();
+            var i = 0;
+            const callback = () => {
+                i++
+            };
+            store.foo = 'bar';
+            store.subscribe('foo', callback);
+            store.unsubscribe('foo', callback);
+            store.foo = 'bazzz';
+            expect(i).toBe(0);
+        });
+        it('should not unsubscribe any callbacks if given a callback that was not subscribed to the given store property', function () {
+            const store = createStore();
+            var i = 0;
+            const callback = () => {
+                i++
+            };
+            store.foo = 'bar';
+            store.subscribe('foo', callback);
+            store.unsubscribe('foo', () => {});
+            store.foo = 'bazzz';
+            expect(i).toBe(1);
+        });
+    });
+
     describe('create', function () {
         it('should initialize a key that can be used like a normal property', function () {
             const store = createStore();

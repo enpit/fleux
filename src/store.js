@@ -25,10 +25,14 @@ const createStore = function (initialValues = {}) {
     };
 
     const unsubscribe = function (name, callback) {
+        var i = -1;
         if (typeof callbacks[name] === 'undefined') {
             callbacks[name] = [];
         }
-        callbacks[name].splice(callbacks[name].indexOf(callback), 1);
+        i = callbacks[name].indexOf(callback);
+        if (i > -1) {
+            callbacks[name].splice(i, 1);
+        }
     };
 
     const select = function (selector) {
